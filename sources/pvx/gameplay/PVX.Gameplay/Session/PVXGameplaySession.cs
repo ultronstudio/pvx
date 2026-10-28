@@ -11,6 +11,13 @@ namespace PVX.Gameplay;
 /// restriction, and <see cref="Resume"/> releases it, so capabilities
 /// restored on resume are exactly whatever other restrictions (dialogue,
 /// cinematics, ...) still allow — never unconditionally "everything".
+///
+/// Each lifecycle method is atomic: the state assignment and its
+/// corresponding event notification both run inside the same try block, so
+/// a throwing subscriber transitions the session to <see cref="PVXGameplayState.Faulted"/>
+/// exactly like a failure in the method's own logic would — it never
+/// leaves <see cref="State"/> claiming a transition succeeded while the
+/// call that was supposed to produce it is still unwinding with an exception.
 /// </remarks>
 public sealed class PVXGameplaySession
 {
@@ -75,14 +82,13 @@ public sealed class PVXGameplaySession
             lifecycleSuspension = null;
 
             State = PVXGameplayState.Active;
+            GameplayStarted?.Invoke(this, EventArgs.Empty);
         }
         catch
         {
             State = PVXGameplayState.Faulted;
             throw;
         }
-
-        GameplayStarted?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -101,14 +107,13 @@ public sealed class PVXGameplaySession
         {
             lifecycleSuspension = Control.AcquireRestriction(PVXControlCapabilities.None, owner: this);
             State = PVXGameplayState.Paused;
+            GameplayPaused?.Invoke(this, EventArgs.Empty);
         }
         catch
         {
             State = PVXGameplayState.Faulted;
             throw;
         }
-
-        GameplayPaused?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -129,14 +134,13 @@ public sealed class PVXGameplaySession
             lifecycleSuspension = null;
 
             State = PVXGameplayState.Active;
+            GameplayResumed?.Invoke(this, EventArgs.Empty);
         }
         catch
         {
             State = PVXGameplayState.Faulted;
             throw;
         }
-
-        GameplayResumed?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -160,13 +164,12 @@ public sealed class PVXGameplaySession
 
             lifecycleSuspension ??= Control.AcquireRestriction(PVXControlCapabilities.None, owner: this);
             State = PVXGameplayState.Ended;
+            GameplayEnded?.Invoke(this, EventArgs.Empty);
         }
         catch
         {
             State = PVXGameplayState.Faulted;
             throw;
         }
-
-        GameplayEnded?.Invoke(this, EventArgs.Empty);
     }
 }

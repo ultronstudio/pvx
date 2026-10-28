@@ -70,6 +70,18 @@ public class DifficultyServiceTests
     }
 
     [Fact]
+    public void SetDifficulty_DefaultId_Throws()
+    {
+        // default(PVXDifficultyId) bypasses the constructor's own
+        // validation (its Value is null), so the service boundary must
+        // reject it too.
+        var service = new PVXDifficultyService();
+
+        Assert.Throws<ArgumentException>(() => service.SetDifficulty(default));
+        Assert.Null(service.Current);
+    }
+
+    [Fact]
     public void PVXDifficultyId_SameValue_AreEqual()
     {
         var a = new PVXDifficultyId("shadowless.standard");

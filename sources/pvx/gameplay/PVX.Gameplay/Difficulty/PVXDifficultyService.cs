@@ -25,8 +25,19 @@ public sealed class PVXDifficultyService
     /// <summary>
     /// Selects the current difficulty. No-op if it is already selected.
     /// </summary>
+    /// <exception cref="ArgumentException">
+    /// <paramref name="difficulty"/> is <c>default</c> (its <see cref="PVXDifficultyId.Value"/>
+    /// is null or whitespace). <c>default(PVXDifficultyId)</c> bypasses the
+    /// constructor's own validation, so the boundary re-checks it here.
+    /// </exception>
     public void SetDifficulty(PVXDifficultyId difficulty)
     {
+        if (string.IsNullOrWhiteSpace(difficulty.Value))
+        {
+            throw new ArgumentException(
+                "PVX difficulty id must not be null or whitespace.", nameof(difficulty));
+        }
+
         if (current == difficulty)
             return;
 

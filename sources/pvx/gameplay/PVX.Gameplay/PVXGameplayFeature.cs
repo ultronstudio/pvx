@@ -25,6 +25,15 @@ public sealed class PVXGameplayFeature : PVXRuntimeFeature
         services.Add(Session);
     }
 
+    /// <remarks>
+    /// Deliberately does not call <see cref="PVXGameplaySession.End"/>: the
+    /// runtime can be shutting down from a faulted state, and forcing an
+    /// End here would run the session's own event subscribers (which can
+    /// throw) as a side effect of tearing down an unrelated feature. The
+    /// session is only removed from the registry; it does not survive
+    /// past this call and callers must not keep using a reference to it
+    /// once the owning runtime has shut down.
+    /// </remarks>
     public override void Shutdown()
     {
         services?.Remove<PVXGameplaySession>();

@@ -165,4 +165,59 @@ public class SessionLifecycleTests
         Assert.Throws<InvalidOperationException>(session.Resume);
         Assert.Throws<InvalidOperationException>(session.End);
     }
+
+    [Fact]
+    public void Start_WhenGameplayStartedSubscriberThrows_TransitionsToFaulted()
+    {
+        var session = new PVXGameplaySession();
+        session.GameplayStarted += (_, _) => throw new InvalidOperationException("boom");
+
+        Assert.Throws<InvalidOperationException>(session.Start);
+        Assert.Equal(PVXGameplayState.Faulted, session.State);
+    }
+
+    [Fact]
+    public void Pause_WhenGameplayPausedSubscriberThrows_TransitionsToFaulted()
+    {
+        var session = new PVXGameplaySession();
+        session.Start();
+        session.GameplayPaused += (_, _) => throw new InvalidOperationException("boom");
+
+        Assert.Throws<InvalidOperationException>(session.Pause);
+        Assert.Equal(PVXGameplayState.Faulted, session.State);
+    }
+
+    [Fact]
+    public void Resume_WhenGameplayResumedSubscriberThrows_TransitionsToFaulted()
+    {
+        var session = new PVXGameplaySession();
+        session.Start();
+        session.Pause();
+        session.GameplayResumed += (_, _) => throw new InvalidOperationException("boom");
+
+        Assert.Throws<InvalidOperationException>(session.Resume);
+        Assert.Equal(PVXGameplayState.Faulted, session.State);
+    }
+
+    [Fact]
+    public void End_WhenGameplayEndingSubscriberThrows_TransitionsToFaulted()
+    {
+        var session = new PVXGameplaySession();
+        session.Start();
+        session.GameplayEnding += (_, _) => throw new InvalidOperationException("boom");
+
+        Assert.Throws<InvalidOperationException>(session.End);
+        Assert.Equal(PVXGameplayState.Faulted, session.State);
+    }
+
+    [Fact]
+    public void End_WhenGameplayEndedSubscriberThrows_TransitionsToFaulted()
+    {
+        var session = new PVXGameplaySession();
+        session.Start();
+        session.GameplayEnded += (_, _) => throw new InvalidOperationException("boom");
+
+        Assert.Throws<InvalidOperationException>(session.End);
+        Assert.Equal(PVXGameplayState.Faulted, session.State);
+    }
 }
