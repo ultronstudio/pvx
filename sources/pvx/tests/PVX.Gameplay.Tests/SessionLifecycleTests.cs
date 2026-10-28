@@ -149,6 +149,7 @@ public class SessionLifecycleTests
 
         Assert.Throws<InvalidOperationException>(session.Start);
         Assert.Equal(PVXGameplayState.Faulted, session.State);
+        Assert.Equal(PVXControlCapabilities.None, session.Control.EffectiveCapabilities);
     }
 
     [Fact]
@@ -174,6 +175,7 @@ public class SessionLifecycleTests
 
         Assert.Throws<InvalidOperationException>(session.Start);
         Assert.Equal(PVXGameplayState.Faulted, session.State);
+        Assert.Equal(PVXControlCapabilities.None, session.Control.EffectiveCapabilities);
     }
 
     [Fact]
@@ -185,6 +187,7 @@ public class SessionLifecycleTests
 
         Assert.Throws<InvalidOperationException>(session.Pause);
         Assert.Equal(PVXGameplayState.Faulted, session.State);
+        Assert.Equal(PVXControlCapabilities.None, session.Control.EffectiveCapabilities);
     }
 
     [Fact]
@@ -197,6 +200,7 @@ public class SessionLifecycleTests
 
         Assert.Throws<InvalidOperationException>(session.Resume);
         Assert.Equal(PVXGameplayState.Faulted, session.State);
+        Assert.Equal(PVXControlCapabilities.None, session.Control.EffectiveCapabilities);
     }
 
     [Fact]
@@ -208,6 +212,7 @@ public class SessionLifecycleTests
 
         Assert.Throws<InvalidOperationException>(session.End);
         Assert.Equal(PVXGameplayState.Faulted, session.State);
+        Assert.Equal(PVXControlCapabilities.None, session.Control.EffectiveCapabilities);
     }
 
     [Fact]
@@ -219,5 +224,62 @@ public class SessionLifecycleTests
 
         Assert.Throws<InvalidOperationException>(session.End);
         Assert.Equal(PVXGameplayState.Faulted, session.State);
+        Assert.Equal(PVXControlCapabilities.None, session.Control.EffectiveCapabilities);
+    }
+
+    [Theory]
+    [MemberData(nameof(FaultingScenarios))]
+    public void FaultedSession_AlwaysSuppressesGameplayControl(Action<PVXGameplaySession> driveToFaulted)
+    {
+        var session = new PVXGameplaySession();
+
+        Assert.ThrowsAny<Exception>(() => driveToFaulted(session));
+
+        Assert.Equal(PVXGameplayState.Faulted, session.State);
+        Assert.Equal(PVXControlCapabilities.None, session.Control.EffectiveCapabilities);
+    }
+
+    public static IEnumerable<object[]> FaultingScenarios()
+    {
+        yield return [new Action<PVXGameplaySession>(s =>
+        {
+            s.GameplayStarted += (_, _) => throw new InvalidOperationException("boom");
+            s.Start();
+        })];
+
+        yield return [new Action<PVXGameplaySession>(s =>
+        {
+            s.Start();
+            s.GameplayPaused += (_, _) => throw new InvalidOperationException("boom");
+            s.Pause();
+        })];
+
+        yield return [new Action<PVXGameplaySession>(s =>
+        {
+            s.Start();
+            s.Pause();
+            s.GameplayResumed += (_, _) => throw new InvalidOperationException("boom");
+            s.Resume();
+        })];
+
+        yield return [new Action<PVXGameplaySession>(s =>
+        {
+            s.Start();
+            s.GameplayEnding += (_, _) => throw new InvalidOperationException("boom");
+            s.End();
+        })];
+
+        yield return [new Action<PVXGameplaySession>(s =>
+        {
+            s.Start();
+            s.GameplayEnded += (_, _) => throw new InvalidOperationException("boom");
+            s.End();
+        })];
+
+        yield return [new Action<PVXGameplaySession>(s =>
+        {
+            s.Control.CapabilitiesChanged += (_, _) => throw new InvalidOperationException("boom");
+            s.Start();
+        })];
     }
 }

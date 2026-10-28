@@ -18,6 +18,13 @@ namespace PVX.Gameplay;
 /// exactly like a failure in the method's own logic would — it never
 /// leaves <see cref="State"/> claiming a transition succeeded while the
 /// call that was supposed to produce it is still unwinding with an exception.
+///
+/// <see cref="PVXGameplayState.Faulted"/> always fails closed: control
+/// capabilities become <see cref="PVXControlCapabilities.None"/>, even if
+/// the failure happened right after a restriction that was suppressing
+/// control was lifted (e.g. a <see cref="GameplayStarted"/> subscriber
+/// throwing immediately after <see cref="Start"/> lifted the pre-start
+/// suspension).
 /// </remarks>
 public sealed class PVXGameplaySession
 {
@@ -86,7 +93,7 @@ public sealed class PVXGameplaySession
         }
         catch
         {
-            State = PVXGameplayState.Faulted;
+            TransitionToFaulted();
             throw;
         }
     }
@@ -111,7 +118,7 @@ public sealed class PVXGameplaySession
         }
         catch
         {
-            State = PVXGameplayState.Faulted;
+            TransitionToFaulted();
             throw;
         }
     }
@@ -138,7 +145,7 @@ public sealed class PVXGameplaySession
         }
         catch
         {
-            State = PVXGameplayState.Faulted;
+            TransitionToFaulted();
             throw;
         }
     }
@@ -168,8 +175,39 @@ public sealed class PVXGameplaySession
         }
         catch
         {
-            State = PVXGameplayState.Faulted;
+            TransitionToFaulted();
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Moves to <see cref="PVXGameplayState.Faulted"/> and fails control
+    /// closed: ensures a capability-suppressing restriction is held,
+    /// regardless of which lifecycle step failed or whether one was
+    /// already lifted earlier in the same call.
+    /// </summary>
+    private void TransitionToFaulted()
+    {
+        State = PVXGameplayState.Faulted;
+
+        // Check actual effective capabilities, not the lifecycleSuspension
+        // field: a restriction's Dispose() removes it from PVXControlService
+        // (and recomputes EffectiveCapabilities) before it can throw, so a
+        // throwing CapabilitiesChanged subscriber can leave this field
+        // pointing at an already-disposed, already-removed token while
+        // capabilities are in fact no longer suppressed.
+        if (Control.EffectiveCapabilities == PVXControlCapabilities.None)
+            return;
+
+        try
+        {
+            lifecycleSuspension = Control.AcquireRestriction(PVXControlCapabilities.None, owner: this);
+        }
+        catch
+        {
+            // The Faulted state itself is what matters here; swallowing a
+            // secondary failure keeps the original lifecycle exception
+            // (the caller's catch re-throws it) as the one that surfaces.
         }
     }
 }
