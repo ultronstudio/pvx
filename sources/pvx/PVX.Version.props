@@ -17,15 +17,22 @@
       PVXVersionPrefix=0.2.0, PVXVersionSuffix=beta1  -> 0.2.0-beta1
       PVXVersionPrefix=0.2.0, PVXVersionSuffix=(empty) -> 0.2.0
 
-    PVX.Core/PVXVersion.cs does not duplicate these values: it reads the
-    AssemblyVersion/InformationalVersion assembly attributes that
-    GenerateAssemblyInfo produces from the properties below.
+    PVX.Core/PVXVersion.cs does not duplicate these values by hand: its
+    GeneratePVXVersion target (in PVX.Core.csproj) writes them into a
+    generated PVXVersion.Generated.cs partial class at build time. Stride's
+    build SDK disables GenerateAssemblyInfo's version attributes repo-wide
+    (see Stride.PackageInfo.targets), so reading them back via reflection
+    is not an option here.
     ================================================================
   -->
 
   <PropertyGroup>
     <PVXVersionPrefix>0.1.0</PVXVersionPrefix>
     <PVXVersionSuffix>dev</PVXVersionSuffix>
+
+    <PVXVersionMajor>$(PVXVersionPrefix.Split('.')[0])</PVXVersionMajor>
+    <PVXVersionMinor>$(PVXVersionPrefix.Split('.')[1])</PVXVersionMinor>
+    <PVXVersionPatch>$(PVXVersionPrefix.Split('.')[2])</PVXVersionPatch>
 
     <PVXInformationalVersion Condition="'$(PVXVersionSuffix)' != ''">$(PVXVersionPrefix)-$(PVXVersionSuffix)</PVXInformationalVersion>
     <PVXInformationalVersion Condition="'$(PVXVersionSuffix)' == ''">$(PVXVersionPrefix)</PVXInformationalVersion>

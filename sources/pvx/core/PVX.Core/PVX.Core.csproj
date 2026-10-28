@@ -21,5 +21,37 @@
     <Company>ultron01</Company>
   </PropertyGroup>
 
+  <!--
+    Writes PVXVersion's constants from PVX.Version.props into a generated
+    partial class, so PVXVersion.cs never hand-duplicates the version.
+    A plain WriteLinesToFile target, not a Roslyn source generator.
+    $(IntermediateOutputPath) is only fully resolved (obj/Debug/<TFM>/) by
+    the time a target runs, not in a top-level PropertyGroup, so the output
+    path is computed here, inside the target.
+  -->
+  <Target Name="GeneratePVXVersion" BeforeTargets="BeforeCompile;CoreCompile">
+    <PropertyGroup>
+      <PVXVersionGeneratedFile>$(IntermediateOutputPath)PVXVersion.Generated.cs</PVXVersionGeneratedFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <_PVXVersionLines Include="// &lt;auto-generated/&gt;" />
+      <_PVXVersionLines Include="namespace PVX.Core%3B" />
+      <_PVXVersionLines Include="public static partial class PVXVersion" />
+      <_PVXVersionLines Include="{" />
+      <_PVXVersionLines Include="    public const int Major = $(PVXVersionMajor)%3B" />
+      <_PVXVersionLines Include="    public const int Minor = $(PVXVersionMinor)%3B" />
+      <_PVXVersionLines Include="    public const int Patch = $(PVXVersionPatch)%3B" />
+      <_PVXVersionLines Include="    public const string Prerelease = &quot;$(PVXVersionSuffix)&quot;%3B" />
+      <_PVXVersionLines Include="    public const string Version = &quot;$(PVXVersionPrefix)&quot;%3B" />
+      <_PVXVersionLines Include="    public const string InformationalVersion = &quot;$(PVXInformationalVersion)&quot;%3B" />
+      <_PVXVersionLines Include="}" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(PVXVersionGeneratedFile)" Lines="@(_PVXVersionLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(PVXVersionGeneratedFile)" />
+      <FileWrites Include="$(PVXVersionGeneratedFile)" />
+    </ItemGroup>
+  </Target>
+
   <Import Project="$(StrideRoot)sources/sdk/Stride.Build.Sdk/Sdk/Sdk.targets" />
 </Project>
