@@ -12,7 +12,14 @@ public static class PVXInfo
     public const string CompanyName = "ultron01";
 
     public const string UpstreamEngine = "Stride";
-    public const string UpstreamVersion = "4.5.0-dev";
+
+    /// <summary>
+    /// The inherited Stride version this PVX build was forked/rebased from.
+    /// Generated from <c>sources/shared/SharedAssemblyInfo.cs</c> (see
+    /// <see cref="PVXVersion.UpstreamVersion"/>) rather than hand-duplicated
+    /// here, so it cannot drift from the actual inherited Stride identity.
+    /// </summary>
+    public static string UpstreamVersion => PVXVersion.UpstreamVersion;
 
     public static string EngineDisplayName => $"{EngineName} {PVXVersion.InformationalVersion}";
     public static string StudioDisplayName => $"{StudioName} {PVXVersion.InformationalVersion}";

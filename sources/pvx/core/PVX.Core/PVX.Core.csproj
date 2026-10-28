@@ -44,6 +44,7 @@
       <_PVXVersionLines Include="    public const string Prerelease = &quot;$(PVXVersionSuffix)&quot;%3B" />
       <_PVXVersionLines Include="    public const string Version = &quot;$(PVXVersionPrefix)&quot;%3B" />
       <_PVXVersionLines Include="    public const string InformationalVersion = &quot;$(PVXInformationalVersion)&quot;%3B" />
+      <_PVXVersionLines Include="    public const string UpstreamVersion = &quot;$(StrideNuGetVersionWithoutMetadata)&quot;%3B" />
       <_PVXVersionLines Include="}" />
     </ItemGroup>
     <WriteLinesToFile File="$(PVXVersionGeneratedFile)" Lines="@(_PVXVersionLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />

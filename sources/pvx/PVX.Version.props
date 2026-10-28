@@ -6,8 +6,16 @@
     ================================================================
 
     Every PVX assembly (PVX.Core, PVX.Runtime, ...) imports this file and
-    must not redeclare <Version>, <AssemblyVersion>, <FileVersion> or
-    <InformationalVersion> itself.
+    must not redeclare <Version>, <PackageVersion>, <AssemblyVersion>,
+    <FileVersion> or <InformationalVersion> itself.
+
+    <PackageVersion> is set explicitly (not left to default from <Version>)
+    because Stride.PackageInfo.targets (imported later, via Sdk.targets)
+    unconditionally defaults an EMPTY PackageVersion to the INHERITED
+    Stride package version ($(StrideNuGetVersion)) for every Stride-SDK
+    project, PVX ones included. Setting it here first means that default
+    never fires for a PVX assembly, so its .nupkg is versioned from PVX's
+    own line, not Stride's.
 
     To release a new PVX version, change PVXVersionPrefix and/or
     PVXVersionSuffix below ONLY. Everything else is derived.
@@ -38,6 +46,7 @@
     <PVXInformationalVersion Condition="'$(PVXVersionSuffix)' == ''">$(PVXVersionPrefix)</PVXInformationalVersion>
 
     <Version>$(PVXInformationalVersion)</Version>
+    <PackageVersion>$(PVXInformationalVersion)</PackageVersion>
     <AssemblyVersion>$(PVXVersionPrefix).0</AssemblyVersion>
     <FileVersion>$(PVXVersionPrefix).0</FileVersion>
     <InformationalVersion>$(PVXInformationalVersion)</InformationalVersion>

@@ -1,6 +1,7 @@
 // Copyright (c) .NET Foundation and Contributors (https://dotnetfoundation.org/ & https://stride3d.net) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -8,36 +9,55 @@ namespace Stride.Core.Reflection;
 
 /// <summary>
 /// Falls back to an already-resolvable, same-simple-named assembly when the
-/// CLR's default binder rejects a load request solely because of a version
+/// CLR's default binder rejects a load request for one of a small,
+/// explicitly known set of assembly names solely because of a version
 /// mismatch.
 /// </summary>
 /// <remarks>
-/// Some vendored, prebuilt third-party binaries this engine depends on (e.g.
-/// <c>deps/BulletPhysics/BulletSharp.NetStandard.dll</c>) were processed, at some
-/// point before this binary was last rebuilt upstream, by Stride's own
+/// <c>deps/BulletPhysics/BulletSharp.NetStandard.dll</c> is a vendored, prebuilt
+/// third-party binary whose module initializer makes static
+/// <c>Type.GetType("Stride.Core, Version=4.0.0.1, ...")</c> calls. That exact
+/// version was baked in whenever this binary was last processed by Stride's own
 /// AssemblyProcessor against whatever Stride.Core AssemblyVersion was current at
-/// the time, and have that exact version baked as a literal string into static
-/// <c>Type.GetType(assemblyQualifiedName)</c> calls inside their module
-/// initializers (e.g. "Stride.Core, Version=4.0.0.1, ..."). Any fork, rebrand, or
-/// version-numbering change to Stride.Core's own AssemblyVersion (see
-/// StrideVersion.AssemblyVersion) therefore stops matching, and those calls throw
-/// <see cref="FileNotFoundException"/> under the CLR's default, strict binder used
-/// by a normal apphost/standalone process (a game, the asset compiler, or an
-/// editor host) — even though an assembly with the exact same simple name is
-/// already loaded in the process. (.NET test hosts such as VSTest's testhost
-/// install their own lenient resolver, which is why identical physics code can run
-/// fine under `dotnet test` while failing as a standalone executable — confirmed
-/// with an isolated <c>Type.GetType</c> repro with no Bullet/Physics code involved
-/// at all.)
+/// the time — a point that predates even this fork's inherited Stride 4.5 line
+/// (confirmed by grepping the binary: it requests 4.0.0.1 regardless of whether
+/// Stride.Core's AssemblyVersion is 4.5.0.0 or something else entirely). So this
+/// is not a problem this fork introduced by rebranding/renumbering Stride.Core;
+/// it is a pre-existing stale-baked-identity defect in that one vendored binary,
+/// and restoring Stride.Core's inherited version identity does not fix it.
 /// <para>
-/// This resolver is deliberately generic (it matches by simple assembly name only,
-/// never a specific assembly) because the same stale-baked-identity failure mode
-/// could recur for any other vendored binary that embeds an assembly-qualified
-/// name against a Stride assembly whose version a consumer has since changed.
+/// Under the CLR's default, strict binder used by a normal apphost/standalone
+/// process (a game, the asset compiler, or an editor host), that stale request
+/// throws <see cref="FileNotFoundException"/> — even though an assembly with the
+/// exact same simple name is already loaded in the process. (.NET test hosts such
+/// as VSTest's testhost install their own lenient resolver, which is why identical
+/// physics code can run fine under <c>dotnet test</c> while failing as a
+/// standalone executable — confirmed with an isolated <c>Type.GetType</c> repro
+/// with no Bullet/Physics code involved at all.)
+/// </para>
+/// <para>
+/// This resolver is deliberately narrow: it only engages for assembly simple
+/// names on <see cref="KnownStaleIdentityAssemblyNames"/>, so a genuinely
+/// incompatible assembly version request for anything else still fails loudly
+/// with the CLR's normal <see cref="FileNotFoundException"/> instead of silently
+/// binding to whatever same-named assembly happens to already be loaded. Add a
+/// name to that list only when a specific vendored binary is confirmed (by the
+/// same kind of investigation as above, not by guessing) to bake a stale
+/// assembly-qualified name against it.
 /// </para>
 /// </remarks>
 public static class AssemblyIdentityFallbackResolver
 {
+    /// <summary>
+    /// Assembly simple names confirmed to be requested with a stale, baked-in
+    /// version by a specific vendored binary. See the type remarks for
+    /// <c>Stride.Core</c> / <c>BulletSharp.NetStandard.dll</c>.
+    /// </summary>
+    private static readonly HashSet<string> KnownStaleIdentityAssemblyNames = new(StringComparer.Ordinal)
+    {
+        "Stride.Core",
+    };
+
     private static bool installed;
 
     /// <summary>
@@ -58,6 +78,9 @@ public static class AssemblyIdentityFallbackResolver
 
     private static Assembly? ResolveBySimpleName(AssemblyLoadContext context, AssemblyName requested)
     {
+        if (requested.Name is null || !KnownStaleIdentityAssemblyNames.Contains(requested.Name))
+            return null; // Not a known stale-identity case: let the CLR fail loudly.
+
         foreach (var loaded in context.Assemblies)
         {
             if (string.Equals(loaded.GetName().Name, requested.Name, StringComparison.Ordinal))

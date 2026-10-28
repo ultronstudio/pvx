@@ -9,6 +9,13 @@ namespace PVX.Core;
 /// them into PVXVersion.Generated.cs at build time, from the single
 /// MSBuild source of PVX version numbers, <c>sources/pvx/PVX.Version.props</c>.
 /// Bump the version there, not in a .cs file.
+/// <para>
+/// <see cref="UpstreamVersion"/> is also generated there, but from a
+/// different source: <c>$(StrideNuGetVersionWithoutMetadata)</c>, derived
+/// from the inherited Stride identity in
+/// <c>sources/shared/SharedAssemblyInfo.cs</c>. That file must stay the
+/// only place the inherited Stride version is edited.
+/// </para>
 /// </remarks>
 public static partial class PVXVersion
 {
