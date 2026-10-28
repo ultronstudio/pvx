@@ -1,4 +1,5 @@
 using PVX.Gameplay;
+using PVX.Interaction;
 using PVX.Runtime;
 
 namespace PVX.Sandbox;
@@ -14,12 +15,14 @@ public sealed class SandboxFeature : PVXRuntimeFeature
     private const int MaxFrames = 10;
 
     private readonly Action requestExit;
+    private readonly PVXInteractionFeature interactionFeature;
 
     private int frameCount;
 
-    public SandboxFeature(Action requestExit)
+    public SandboxFeature(Action requestExit, PVXInteractionFeature interactionFeature)
     {
         this.requestExit = requestExit ?? throw new ArgumentNullException(nameof(requestExit));
+        this.interactionFeature = interactionFeature ?? throw new ArgumentNullException(nameof(interactionFeature));
     }
 
     public override void Initialize(PVXRuntimeContext context)
@@ -27,7 +30,13 @@ public sealed class SandboxFeature : PVXRuntimeFeature
         Console.WriteLine("[PVX Sandbox] Initialize");
         Console.WriteLine($"[PVX Sandbox] Runtime: PVX Engine {context.Runtime.EngineVersion}");
 
-        RunGameplayDemo(context);
+        var session = context.Services.GetRequired<PVXGameplaySession>();
+
+        RunGameplayDemo(session);
+        RunInteractionDemo(context, session);
+
+        session.End();
+        Console.WriteLine($"[PVX Sandbox] Gameplay state: {session.State}");
     }
 
     public override void Update(in PVXFrameTime time)
@@ -55,10 +64,8 @@ public sealed class SandboxFeature : PVXRuntimeFeature
     /// registered by <see cref="PVXGameplayFeature"/>: lifecycle, primary
     /// player, difficulty, and composable control restrictions.
     /// </summary>
-    private void RunGameplayDemo(PVXRuntimeContext context)
+    private void RunGameplayDemo(PVXGameplaySession session)
     {
-        var session = context.Services.GetRequired<PVXGameplaySession>();
-
         Console.WriteLine($"[PVX Sandbox] Gameplay state: {session.State}");
 
         session.Start();
@@ -71,24 +78,67 @@ public sealed class SandboxFeature : PVXRuntimeFeature
         Console.WriteLine("[PVX Sandbox] Primary player registered");
 
         Console.WriteLine($"[PVX Sandbox] Controls: {session.Control.EffectiveCapabilities}");
+    }
 
-        using (session.Control.AcquireRestriction(PVXControlCapabilities.Look, owner: this))
-        {
-            Console.WriteLine($"[PVX Sandbox] Controls: {session.Control.EffectiveCapabilities}");
+    /// <summary>
+    /// Exercises PVX.Interaction end to end through the
+    /// <see cref="PVXInteractionService"/> registered by
+    /// <see cref="PVXInteractionFeature"/>: target discovery, focus,
+    /// multiple actions, instant and hold interactions, the ladder
+    /// hand-off acceptance case, and Gameplay.Interact/pause integration.
+    /// </summary>
+    private void RunInteractionDemo(PVXRuntimeContext context, PVXGameplaySession session)
+    {
+        var service = context.Services.GetRequired<PVXInteractionService>();
+        var provider = new SandboxTargetProvider();
+        service.TargetProvider = provider;
 
-            session.Pause();
-            Console.WriteLine($"[PVX Sandbox] Gameplay state: {session.State}");
-            Console.WriteLine($"[PVX Sandbox] Controls: {session.Control.EffectiveCapabilities}");
+        var source = new SandboxInteractionSource();
+        var traversal = new SandboxTraversalHandler();
 
-            session.Resume();
-            Console.WriteLine($"[PVX Sandbox] Gameplay state: {session.State}");
-            Console.WriteLine($"[PVX Sandbox] Controls: {session.Control.EffectiveCapabilities}");
-        }
+        // --- Door: instant interaction ---------------------------------
+        var door = new SandboxDoor();
+        provider.Current = new PVXInteractionCandidate(door);
+        service.Update(source, TimeSpan.Zero);
+        Console.WriteLine($"[PVX Sandbox] Interaction focus: SandboxDoor, primary action: {service.PrimaryAction?.ActionId}");
 
-        Console.WriteLine($"[PVX Sandbox] Controls: {session.Control.EffectiveCapabilities}");
+        service.BeginPrimaryInteraction(source);
+        Console.WriteLine($"[PVX Sandbox] Interaction state after Open: ActiveInteraction={service.ActiveInteraction is not null}");
 
-        session.End();
-        Console.WriteLine($"[PVX Sandbox] Gameplay state: {session.State}");
+        // --- Hold object: begin, partial progress, cancel ---------------
+        var holdObject = new SandboxHoldObject();
+        provider.Current = new PVXInteractionCandidate(holdObject);
+        service.Update(source, TimeSpan.Zero);
+        Console.WriteLine($"[PVX Sandbox] Interaction focus: SandboxHoldObject, primary action: {service.PrimaryAction?.ActionId}");
+
+        service.BeginPrimaryInteraction(source);
+        service.Update(source, TimeSpan.FromSeconds(1.0));
+        Console.WriteLine($"[PVX Sandbox] Hold progress: {service.ActiveInteraction?.Progress:P0}");
+
+        service.CancelActiveInteraction();
+        Console.WriteLine($"[PVX Sandbox] Hold cancelled: ActiveInteraction={service.ActiveInteraction is not null}");
+
+        // --- Ladder: bottom entry hands off to a fake traversal handler --
+        var ladder = new SandboxLadder(traversal);
+        provider.Current = new PVXInteractionCandidate(ladder, SandboxLadder.BottomEntry);
+        service.Update(source, TimeSpan.Zero);
+        Console.WriteLine($"[PVX Sandbox] Interaction focus: SandboxLadder.BottomEntry, primary action: {service.PrimaryAction?.ActionId}");
+
+        service.BeginPrimaryInteraction(source);
+
+        // --- Pause blocks execution; resume does not auto-restart --------
+        session.Pause();
+        Console.WriteLine($"[PVX Sandbox] Gameplay state: {session.State}, Controls: {session.Control.EffectiveCapabilities}");
+
+        var blockedResult = service.BeginPrimaryInteraction(source);
+        Console.WriteLine($"[PVX Sandbox] Interaction begin while paused: allowed={blockedResult}");
+
+        session.Resume();
+        Console.WriteLine($"[PVX Sandbox] Gameplay state: {session.State}, Controls: {session.Control.EffectiveCapabilities}");
+
+        // Let the remaining per-frame updates drive the service through
+        // PVXInteractionFeature.Update too, not only this manual demo.
+        interactionFeature.Source = source;
     }
 
     private sealed class SandboxPlayer : IPVXPlayer

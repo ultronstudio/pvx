@@ -1,4 +1,5 @@
 using PVX.Gameplay;
+using PVX.Interaction;
 using PVX.Runtime;
 
 namespace PVX.Sandbox;
@@ -10,9 +11,12 @@ public sealed class SandboxGame : PVXGame
 {
     public SandboxGame()
     {
-        // Registered before SandboxFeature so PVXGameplaySession is already
-        // in the service registry by the time SandboxFeature initializes.
+        // Registration order matters: PVX runtime features initialize in
+        // registration order, and PVXInteractionFeature requires
+        // PVXGameplaySession (registered by PVXGameplayFeature) to already
+        // be in the service registry. SandboxFeature in turn requires both.
         Runtime.AddFeature(new PVXGameplayFeature());
-        Runtime.AddFeature(new SandboxFeature(Exit));
+        var interaction = Runtime.AddFeature(new PVXInteractionFeature());
+        Runtime.AddFeature(new SandboxFeature(Exit, interaction));
     }
 }
