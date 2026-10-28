@@ -73,21 +73,58 @@ public class EventRobustnessTests
     }
 
     [Fact]
-    public void ThrowingStartedSubscriber_StillBegan_ButServiceStaysConsistent()
+    public void ThrowingStartedSubscriber_Hold_CleansUp()
     {
         var (service, source, action) = CreateFocusedHold(TimeSpan.FromSeconds(2));
-        service.InteractionStarted += (_, _) => throw new InvalidOperationException("boom");
+        EventHandler<PVXInteractionEventArgs> throwingHandler = (_, _) => throw new InvalidOperationException("boom");
+        service.InteractionStarted += throwingHandler;
 
         Assert.Throws<InvalidOperationException>(() => service.BeginPrimaryInteraction(source));
 
-        // Begin() itself succeeded before the throwing subscriber ran, so
-        // the interaction genuinely is active; it can still be cancelled.
-        Assert.NotNull(service.ActiveInteraction);
-        Assert.Equal(1, action.BeginCount);
-
-        var result = service.CancelActiveInteraction();
-        Assert.True(result);
+        // Begin() itself succeeded before the throwing subscriber ran, but
+        // the service must not be left believing the interaction is still
+        // active: nothing would ever resolve it (Update only advances a
+        // live ActiveInteraction, and there isn't one anymore), so it is
+        // cleaned up as if cancelled, with the action's own Cancel() called.
         Assert.Null(service.ActiveInteraction);
+        Assert.Equal(1, action.BeginCount);
+        Assert.Equal(0, action.ExecuteCount);
+        Assert.Equal(1, action.CancelCount);
+
+        // The service must still be usable afterward.
+        service.InteractionStarted -= throwingHandler;
+        var result = service.BeginPrimaryInteraction(source);
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void ThrowingStartedSubscriber_Instant_CleansUp()
+    {
+        var (session, _) = TestSessions.CreateActive();
+        var action = new FakeAction();
+        var descriptor = new PVXInteractionDescriptor(new PVXInteractionActionId("toggle"), action, priority: 10);
+        var target = new FakeInteractable { ActionsFactory = _ => [descriptor] };
+        var provider = new FakeTargetProvider();
+        provider.Candidates.Add(new PVXInteractionCandidate(target));
+        var service = new PVXInteractionService(session) { TargetProvider = provider };
+        var source = new FakeInteractionSource();
+        service.Update(source, TimeSpan.Zero);
+        EventHandler<PVXInteractionEventArgs> throwingHandler = (_, _) => throw new InvalidOperationException("boom");
+        service.InteractionStarted += throwingHandler;
+
+        Assert.Throws<InvalidOperationException>(() => service.BeginPrimaryInteraction(source));
+
+        // Without this cleanup, Instant would be worse than Hold: nothing
+        // in Update() ever advances/executes a non-Hold ActiveInteraction,
+        // so a dangling one here would block every future interaction forever.
+        Assert.Null(service.ActiveInteraction);
+        Assert.Equal(1, action.BeginCount);
+        Assert.Equal(0, action.ExecuteCount);
+        Assert.Equal(1, action.CancelCount);
+
+        service.InteractionStarted -= throwingHandler;
+        var result = service.BeginPrimaryInteraction(source);
+        Assert.True(result);
     }
 
     [Fact]

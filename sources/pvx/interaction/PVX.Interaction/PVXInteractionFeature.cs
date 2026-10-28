@@ -54,13 +54,19 @@ public sealed class PVXInteractionFeature : PVXRuntimeFeature
     }
 
     /// <remarks>
-    /// Mirrors <see cref="PVXGameplayFeature.Shutdown"/>: only removes the
-    /// service from the registry. It deliberately does not force-cancel an
-    /// active interaction, which would run user event subscribers as a side
-    /// effect of unrelated runtime teardown.
+    /// Disposes the service (detaching it from <see cref="PVXGameplaySession"/>'s
+    /// events — see <see cref="PVXInteractionService.Dispose"/>) before
+    /// removing it from the registry, so a later Initialize on this same
+    /// feature instance (the PVX runtime can be stopped and re-initialized
+    /// while reusing feature instances) starts from a clean slate instead
+    /// of leaving this instance's subscriptions on the still-alive session.
+    /// Dispose() deliberately does not force-cancel an active interaction
+    /// or run user event subscribers as a side effect of teardown, mirroring
+    /// <see cref="PVXGameplayFeature.Shutdown"/>'s own restraint.
     /// </remarks>
     public override void Shutdown()
     {
+        Service?.Dispose();
         services?.Remove<PVXInteractionService>();
         services = null;
         Service = null;

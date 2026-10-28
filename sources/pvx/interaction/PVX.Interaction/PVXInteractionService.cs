@@ -22,7 +22,7 @@ namespace PVX.Interaction;
 /// blocking all future ones — the same lesson PVX.Gameplay's own hardening
 /// already established for its lifecycle events.
 /// </remarks>
-public sealed class PVXInteractionService
+public sealed class PVXInteractionService : IDisposable
 {
     private static readonly IReadOnlyList<PVXInteractionDescriptor> NoActions = Array.Empty<PVXInteractionDescriptor>();
 
@@ -129,6 +129,38 @@ public sealed class PVXInteractionService
     /// </summary>
     public bool CancelActiveInteraction() => CancelActiveInteraction(reason: "explicit");
 
+    /// <summary>
+    /// Unsubscribes from <see cref="Session"/>'s events and clears local
+    /// state. Does not raise any interaction events and does not call the
+    /// active action's <see cref="IPVXInteractionAction.Cancel"/>, if any
+    /// — this is teardown, not a mid-interaction cancellation.
+    /// </summary>
+    /// <remarks>
+    /// Required because <see cref="Session"/> is owned and kept alive by
+    /// <c>PVXGameplayFeature</c> independently of this service: a PVX
+    /// runtime can be stopped and re-initialized while reusing the same
+    /// feature instances (see <c>PVXRuntime</c>'s Stopped → Initializing →
+    /// Running cycle), which would otherwise construct a new
+    /// <see cref="PVXInteractionService"/> on every re-initialize without
+    /// ever detaching the previous one's subscriptions from the
+    /// still-alive session — leaving every past instance reacting to
+    /// future Pause/PlayerChanged/CapabilitiesChanged events alongside the
+    /// current one. Safe to call more than once.
+    /// </remarks>
+    public void Dispose()
+    {
+        Session.Player.PrimaryPlayerChanged -= OnPrimaryPlayerChanged;
+        Session.Control.CapabilitiesChanged -= OnCapabilitiesChanged;
+        Session.GameplayPaused -= OnGameplayBlockingTransition;
+        Session.GameplayEnding -= OnGameplayBlockingTransition;
+
+        ActiveInteraction = null;
+        CurrentFocus = null;
+        Actions = NoActions;
+        PrimaryAction = null;
+        SecondaryAction = null;
+    }
+
     private bool TryBeginInteraction(PVXInteractionDescriptor? descriptor, IPVXInteractionSource source)
     {
         ArgumentNullException.ThrowIfNull(source);
@@ -155,7 +187,33 @@ public sealed class PVXInteractionService
 
         descriptor.Action.Begin(context);
         ActiveInteraction = new PVXActiveInteraction(context, descriptor, TimeSpan.Zero);
-        InteractionStarted?.Invoke(this, new PVXInteractionEventArgs(context, descriptor));
+
+        try
+        {
+            InteractionStarted?.Invoke(this, new PVXInteractionEventArgs(context, descriptor));
+        }
+        catch
+        {
+            // A throwing InteractionStarted subscriber must not leave a
+            // dangling active interaction: for Instant mode nothing would
+            // ever execute it afterward (Update only advances Hold
+            // progress), and leaving Hold differently "half-started" than
+            // Instant would just be a second inconsistency. Clean up like
+            // an explicit cancel would, but without re-entering the event
+            // infrastructure that just failed.
+            ActiveInteraction = null;
+
+            try
+            {
+                descriptor.Action.Cancel(context);
+            }
+            catch
+            {
+                // Preserve the original InteractionStarted exception.
+            }
+
+            throw;
+        }
 
         if (descriptor.Mode == PVXInteractionMode.Instant)
         {
