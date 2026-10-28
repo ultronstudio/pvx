@@ -12,17 +12,17 @@ namespace Stride.GameStudio.Helpers
     public static class StrideGameStudio
     {
         [NotNull]
-        public static string CopyrightText1 => "© 2018 Stride contributors";
+        public static string CopyrightText1 => $"© 2018-{new DateTime().Year} Stride contributors";
 
         [NotNull]
-        public static string CopyrightText2 => "© 2011-2018 Silicon Studio Corp.";
+        public static string CopyrightText2 => $"© 2026-{new DateTime().Year} ultron01";
 
         [NotNull]
-        public static string EditorName => $"Stride Game Studio {EditorVersion} ({RuntimeLabel})";
+        public static string EditorName => $"PVX Studio {EditorVersion} ({RuntimeLabel})";
 
         // EditorName plus the active graphics API in the environment group; for the main window title.
         [NotNull]
-        public static string EditorNameWithGraphicsApi => $"Stride Game Studio {EditorVersion} ({EditorEnvironment})";
+        public static string EditorNameWithGraphicsApi => $"PVX Studio {EditorVersion} ({EditorEnvironment})";
 
         /// <summary>Runtime and graphics API of this process, e.g. ".NET 11.0.0-rc.1, Vulkan".</summary>
         [NotNull]
