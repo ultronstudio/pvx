@@ -30,7 +30,7 @@ public class AssetUrlConstantsGenerator : IIncrementalGenerator
         "STRDIAG012",
         "Asset constant identifier collision",
         "The asset '{0}' maps to identifier '{1}' which is already taken; it was emitted as '{2}'",
-        "PVX Studio",
+        "Stride",
         DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
 
@@ -38,7 +38,7 @@ public class AssetUrlConstantsGenerator : IIncrementalGenerator
         "STRDIAG013",
         "Asset constants class name conflicts with a namespace",
         "The asset constants class '{0}.{1}' conflicts with an existing namespace; set <StrideAssetConstantsClassName> (e.g. '{2}') to generate under a different name",
-        "PVX Studio",
+        "Stride",
         DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
 
@@ -46,7 +46,7 @@ public class AssetUrlConstantsGenerator : IIncrementalGenerator
         "STRDIAG015",
         "Asset constants of a former engine asset type are untyped",
         "The '{0}' asset constants are untyped: this asset type moved out of the engine; reference the {1} package to get typed constants",
-        "PVX Studio",
+        "Stride",
         DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
 

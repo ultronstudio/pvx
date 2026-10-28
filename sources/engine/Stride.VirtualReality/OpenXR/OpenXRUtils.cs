@@ -104,7 +104,7 @@ namespace Stride.VirtualReality
             Span<byte> appName = new Span<byte>(appInfo.ApplicationName, 128);
             Span<byte> engName = new Span<byte>(appInfo.EngineName, 128);
             SilkMarshal.StringIntoSpan(System.AppDomain.CurrentDomain.FriendlyName, appName);
-            SilkMarshal.StringIntoSpan("PVX Studio", engName);
+            SilkMarshal.StringIntoSpan("Stride", engName);
 
             var requestedExtensions = SilkMarshal.StringArrayToPtr(openXrExtensions);
             InstanceCreateInfo instanceCreateInfo = new InstanceCreateInfo
