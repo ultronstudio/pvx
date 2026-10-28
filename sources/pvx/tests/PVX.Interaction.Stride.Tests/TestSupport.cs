@@ -18,6 +18,25 @@ internal sealed class TestInteractableComponent : EntityComponent, IPVXInteracta
         ActionsFactory?.Invoke(context) ?? Array.Empty<PVXInteractionDescriptor>();
 }
 
+/// <summary>
+/// Deliberately bypasses every invariant <see cref="IPVXStrideRayInteractionSource"/>
+/// documents (finite origin, unit-length direction, positive finite max
+/// distance): a third-party implementation would not necessarily go
+/// through <see cref="PVXStrideRayInteractionSource"/>'s own validated
+/// constructor, so <see cref="PVXStridePhysicsTargetProvider"/> must not
+/// assume these fields are well-formed just because the interface says so.
+/// </summary>
+internal sealed class UnvalidatedRayInteractionSource : IPVXStrideRayInteractionSource
+{
+    public Vector3 Origin { get; set; }
+
+    public Vector3 Direction { get; set; }
+
+    public float MaxDistance { get; set; }
+
+    public Entity? OwnerEntity { get; set; }
+}
+
 internal sealed class TestInteractionAction : IPVXInteractionAction
 {
     public int BeginCount { get; private set; }

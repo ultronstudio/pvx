@@ -10,7 +10,8 @@ namespace PVX.Interaction.Stride.Tests;
 /// repo's known unrelated BulletSharp/native issue affecting some
 /// upstream Stride.Physics.Tests/Stride.Navigation.Tests runs.
 /// </summary>
-public class PhysicsSmokeTest : IClassFixture<PhysicsFixture>
+[Collection("PVX Physics")]
+public class PhysicsSmokeTest
 {
     private readonly PhysicsFixture fixture;
 

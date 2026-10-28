@@ -11,7 +11,8 @@ namespace PVX.Interaction.Stride.Tests;
 /// (see its own remarks for why), adding and removing each scenario's own
 /// entities so facts stay independent despite the shared simulation.
 /// </summary>
-public class PhysicsTargetProviderTests : IClassFixture<PhysicsFixture>
+[Collection("PVX Physics")]
+public class PhysicsTargetProviderTests
 {
     private readonly PhysicsFixture fixture;
 
@@ -259,6 +260,36 @@ public class PhysicsTargetProviderTests : IClassFixture<PhysicsFixture>
 
         var candidate = Assert.Single(candidates);
         Assert.IsType<TestInteractableComponent>(candidate.Target);
+    }
+
+    [Fact]
+    public async Task Provider_CustomSourceWithNonUnitDirection_NormalizesDefensively()
+    {
+        var candidates = await fixture.RunScenario(async game =>
+        {
+            var target = CreateInteractableEntity("Target", new Vector3(0, 0, -5));
+            await game.AddAndSettle(target);
+
+            var provider = CreateProvider(game);
+
+            // A non-conforming source reporting a 0.1-length direction: if
+            // the provider trusted it as already unit length, MaxDistance
+            // 5 would only reach z=-0.5 and miss the target entirely.
+            // Defensive normalization must still reach z=-5.
+            var source = new UnvalidatedRayInteractionSource
+            {
+                Origin = Vector3.Zero,
+                Direction = new Vector3(0, 0, -0.1f),
+                MaxDistance = 5f,
+            };
+
+            var result = provider.GetCandidates(source);
+
+            await game.RemoveAndSettle(target);
+            return result;
+        });
+
+        Assert.Single(candidates);
     }
 
     [Fact]

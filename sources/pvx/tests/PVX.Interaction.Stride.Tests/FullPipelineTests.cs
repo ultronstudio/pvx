@@ -12,7 +12,8 @@ namespace PVX.Interaction.Stride.Tests;
 /// <see cref="PVXInteractionService"/>'s <c>CurrentFocus</c>/<c>PrimaryAction</c>.
 /// This is the actual bridge the milestone exists to prove.
 /// </summary>
-public class FullPipelineTests : IClassFixture<PhysicsFixture>
+[Collection("PVX Physics")]
+public class FullPipelineTests
 {
     private readonly PhysicsFixture fixture;
 

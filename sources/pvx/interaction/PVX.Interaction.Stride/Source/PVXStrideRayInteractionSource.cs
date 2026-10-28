@@ -12,7 +12,7 @@ public sealed class PVXStrideRayInteractionSource : IPVXStrideRayInteractionSour
 {
     public PVXStrideRayInteractionSource(Vector3 origin, Vector3 direction, float maxDistance, Entity? ownerEntity = null)
     {
-        Origin = origin;
+        Origin = ValidateOrigin(origin);
         Direction = ValidateAndNormalize(direction);
         MaxDistance = ValidateMaxDistance(maxDistance);
         OwnerEntity = ownerEntity;
@@ -25,6 +25,22 @@ public sealed class PVXStrideRayInteractionSource : IPVXStrideRayInteractionSour
     public float MaxDistance { get; }
 
     public Entity? OwnerEntity { get; }
+
+    /// <summary>
+    /// Validates that <paramref name="origin"/> is finite (no NaN/Infinity
+    /// components), so an already-corrupt transform fails loudly here
+    /// instead of silently reaching the native raycast.
+    /// </summary>
+    internal static Vector3 ValidateOrigin(Vector3 origin)
+    {
+        if (!IsFinite(origin))
+        {
+            throw new ArgumentException(
+                "PVX ray interaction origin must be finite (no NaN/Infinity components).", nameof(origin));
+        }
+
+        return origin;
+    }
 
     /// <summary>
     /// Validates that <paramref name="direction"/> is finite and non-zero,

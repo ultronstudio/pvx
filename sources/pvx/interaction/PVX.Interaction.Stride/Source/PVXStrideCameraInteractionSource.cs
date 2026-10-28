@@ -32,7 +32,7 @@ public sealed class PVXStrideCameraInteractionSource : IPVXStrideRayInteractionS
         OwnerEntity = ownerEntity;
     }
 
-    public Vector3 Origin => camera.Entity.Transform.WorldMatrix.TranslationVector;
+    public Vector3 Origin => PVXStrideRayInteractionSource.ValidateOrigin(camera.Entity.Transform.WorldMatrix.TranslationVector);
 
     public Vector3 Direction => PVXStrideRayInteractionSource.ValidateAndNormalize(camera.Entity.Transform.WorldMatrix.Forward);
 

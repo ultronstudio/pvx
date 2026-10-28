@@ -12,6 +12,20 @@ public class RaySourceTests
             new PVXStrideRayInteractionSource(Vector3.Zero, Vector3.Zero, 5f));
     }
 
+    [Fact]
+    public void ExplicitRaySource_NonFiniteOrigin_Throws()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            new PVXStrideRayInteractionSource(new Vector3(float.NaN, 0, 0), new Vector3(0, 0, -1), 5f));
+    }
+
+    [Fact]
+    public void ExplicitRaySource_InfiniteOrigin_Throws()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            new PVXStrideRayInteractionSource(new Vector3(float.PositiveInfinity, 0, 0), new Vector3(0, 0, -1), 5f));
+    }
+
     [Theory]
     [InlineData(0f)]
     [InlineData(-1f)]

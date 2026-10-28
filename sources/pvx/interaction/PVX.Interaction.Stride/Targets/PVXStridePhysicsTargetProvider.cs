@@ -62,12 +62,29 @@ public sealed class PVXStridePhysicsTargetProvider : IPVXInteractionTargetProvid
         if (source is not IPVXStrideRayInteractionSource raySource)
             return Array.Empty<PVXInteractionCandidate>();
 
+        var from = raySource.Origin;
+        var direction = raySource.Direction;
+        var maxDistance = raySource.MaxDistance;
+
+        // IPVXStrideRayInteractionSource is a public interface: its own
+        // documented invariants (finite origin, unit-length direction,
+        // positive finite max distance) are enforced by the sources this
+        // bridge ships, but nothing stops a third-party implementation
+        // from skipping that validation. Fail closed here, at the native
+        // boundary, rather than handing NaN/Infinity/zero to Bullet.
+        if (!IsFinite(from) || !IsFinite(direction) || direction.LengthSquared() <= 0f
+            || !float.IsFinite(maxDistance) || maxDistance <= 0f)
+        {
+            return Array.Empty<PVXInteractionCandidate>();
+        }
+
+        direction.Normalize();
+
         var simulation = simulationAccessor();
         if (simulation is null)
             return Array.Empty<PVXInteractionCandidate>();
 
-        var from = raySource.Origin;
-        var to = from + raySource.Direction * raySource.MaxDistance;
+        var to = from + direction * maxDistance;
 
         hitsBuffer.Clear();
         simulation.RaycastPenetrating(from, to, hitsBuffer, FilterGroup, InteractionQueryMask, HitTriggers);
@@ -96,6 +113,8 @@ public sealed class PVXStridePhysicsTargetProvider : IPVXInteractionTargetProvid
         var distance = Vector3.Distance(from, nearestHit.Point);
         return [new PVXInteractionCandidate(interactable, point, priority, distance)];
     }
+
+    private static bool IsFinite(Vector3 v) => float.IsFinite(v.X) && float.IsFinite(v.Y) && float.IsFinite(v.Z);
 
     /// <summary>
     /// True when <paramref name="entity"/> is <paramref name="owner"/> or a
