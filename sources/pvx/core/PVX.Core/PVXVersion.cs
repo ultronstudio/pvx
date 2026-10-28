@@ -11,8 +11,8 @@ public static class PVXVersion
 
     public const string Prerelease = "dev";
 
-    public const string Version = $"0.1.0";
-    public const string InformationalVersion = $"0.1.0-dev";
+    public const string Version = "0.1.0";
+    public const string InformationalVersion = "0.1.0-dev";
 
     public static System.Version RuntimeVersion { get; } = new(Major, Minor, Patch);
 }
