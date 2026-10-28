@@ -1,0 +1,38 @@
+<Project>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'Directory.Build.props'))/sdk/Stride.Build.Sdk/Sdk/Sdk.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'Directory.Build.props'))/pvx/PVX.Version.props" />
+
+  <PropertyGroup>
+    <Description>Manual-test playground for PVX.World: a real window, a diagnostic free-fly camera, a door and a switch, wired through the real PVX interaction pipeline end to end.</Description>
+
+    <AssemblyName>PVX.World.Playground</AssemblyName>
+    <RootNamespace>PVX.World.Playground</RootNamespace>
+
+    <TargetFrameworks>$(StrideRuntimeTargetFrameworks)</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+
+    <AssemblyTitle>PVX.World.Playground</AssemblyTitle>
+    <Product>PVX Engine</Product>
+    <Company>ultron01</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\runtime\PVX.Runtime\PVX.Runtime.csproj" />
+    <ProjectReference Include="..\..\gameplay\PVX.Gameplay\PVX.Gameplay.csproj" />
+    <ProjectReference Include="..\..\interaction\PVX.Interaction\PVX.Interaction.csproj" />
+    <ProjectReference Include="..\..\interaction\PVX.Interaction.Stride\PVX.Interaction.Stride.csproj" />
+    <ProjectReference Include="..\..\world\PVX.World\PVX.World.csproj" />
+
+    <ProjectReference Include="..\..\..\engine\Stride.Input\Stride.Input.csproj" />
+    <ProjectReference Include="..\..\..\engine\Stride.Rendering\Stride.Rendering.csproj" />
+    <ProjectReference Include="..\..\..\plugins\BulletPhysics\Stride.Physics\Stride.Physics.csproj" />
+  </ItemGroup>
+
+  <Import Project="$(StrideRoot)sources/sdk/Stride.Build.Sdk/Sdk/Sdk.targets" />
+</Project>
