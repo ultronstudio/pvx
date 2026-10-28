@@ -67,6 +67,7 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\pvx\core\PVX.Core\PVX.Core.csproj" />
     <ProjectReference Include="..\..\engine\Stride.Debugger\Stride.Debugger.csproj" />
     <ProjectReference Include="..\..\tools\Stride.ConnectionRouter\Stride.ConnectionRouter.csproj" /> 
     <ProjectReference Include="..\..\tools\Stride.PackageInstall\Stride.PackageInstall.csproj">

@@ -18,11 +18,11 @@ namespace Stride.GameStudio.Helpers
         public static string CopyrightText2 => $"© 2026-{new DateTime().Year} ultron01";
 
         [NotNull]
-        public static string EditorName => $"{PVXBranding.StudioDisplayName}";
+        public static string EditorName => $"{PVX.Core.PVXInfo.StudioDisplayName}";
 
         // EditorName plus the active graphics API in the environment group; for the main window title.
         [NotNull]
-        public static string EditorNameWithGraphicsApi => $"{PVXBranding.StudioDisplayName} ({EditorEnvironment})";
+        public static string EditorNameWithGraphicsApi => $"{PVX.Core.PVXInfo.StudioDisplayName} ({EditorEnvironment})";
 
         /// <summary>Runtime and graphics API of this process, e.g. ".NET 11.0.0-rc.1, Vulkan".</summary>
         [NotNull]

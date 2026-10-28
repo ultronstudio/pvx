@@ -86,7 +86,7 @@ public static partial class Program
 
     private static void StartupFailureDialog(object sender, UnhandledExceptionEventArgs e)
     {
-        MessageBoxW(IntPtr.Zero, $"PVX Studio failed to start.\n\n{e.ExceptionObject}", PVXBranding.StudioName, 0x10 /* MB_ICONERROR */);
+        MessageBoxW(IntPtr.Zero, $"{PVX.Core.PVXInfo.StudioName} failed to start.\n\n{e.ExceptionObject}", PVX.Core.PVXInfo.StudioName, 0x10 /* MB_ICONERROR */);
     }
 
     [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
@@ -98,7 +98,7 @@ public static partial class Program
         // Surface a recorded --graphics-api startup error and exit.
         if (GraphicsApiSelector.StartupError is { } graphicsApiError)
         {
-            MessageBox.Show(graphicsApiError, PVXBranding.StudioName, MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(graphicsApiError, PVX.Core.PVXInfo.StudioName, MessageBoxButton.OK, MessageBoxImage.Error);
             Environment.Exit(1);
         }
 
@@ -108,8 +108,8 @@ public static partial class Program
         {
             var fallback = GraphicsApiHostResolver.FallbackApi;
             var choice = MessageBox.Show(
-                $"Graphics API '{unavailableApi}' (from Game Studio settings) is not available in this build.\n\nContinue with '{fallback}' and reset the setting to Default?",
-                PVXBranding.StudioName, MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                $"Graphics API '{unavailableApi}' (from {PVX.Core.PVXInfo.StudioName} settings) is not available in this build.\n\nContinue with '{fallback}' and reset the setting to Default?",
+                PVX.Core.PVXInfo.StudioName, MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (choice != MessageBoxResult.Yes)
                 Environment.Exit(1);
             GraphicsApiHostResolver.UseFallback();
@@ -140,10 +140,10 @@ public static partial class Program
         // One taskbar identity per install, whether we run as our apphost or re-executed under dotnet.exe (which the
         // taskbar would otherwise show as ".NET Host"). Installs stay separate, runtimes of one install merge.
         if (OperatingSystem.IsWindows())
-            HostedWindowIdentity.Install("Stride.GameStudio." + DotNetHostSelector.PathHash(AppContext.BaseDirectory), PVXBranding.StudioDisplayName, System.IO.Path.ChangeExtension(AppDllPath, ".exe"));
+            HostedWindowIdentity.Install("Stride.GameStudio." + DotNetHostSelector.PathHash(AppContext.BaseDirectory), PVX.Core.PVXInfo.StudioDisplayName, System.IO.Path.ChangeExtension(AppDllPath, ".exe"));
         if (IntPtr.Size == 4)
         {
-            MessageBox.Show("PVX Studio requires a 64bit OS to run.", PVXBranding.StudioName, MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"{PVX.Core.PVXInfo.StudioName} requires a 64bit OS to run.", PVX.Core.PVXInfo.StudioName, MessageBoxButton.OK, MessageBoxImage.Error);
             Environment.Exit(1);
         }
 
@@ -563,7 +563,7 @@ public static partial class Program
     {
         var decision = DotNetHostSelector.ResolveFor(AppDllPath, Environment.Version.Major, sessionPath, args);
         if (decision.Kind == DotNetHostSelector.DecisionKind.Missing)
-            MessageBox.Show(decision.Reason, PVXBranding.StudioName, MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(decision.Reason, PVX.Core.PVXInfo.StudioName, MessageBoxButton.OK, MessageBoxImage.Warning);
         return decision;
     }
 

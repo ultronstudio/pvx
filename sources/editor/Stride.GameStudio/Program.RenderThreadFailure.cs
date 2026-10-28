@@ -90,7 +90,7 @@ public static partial class Program
     private static int ShowNativeMessageBox(string text, uint type)
     {
         var result = 0;
-        var thread = new Thread(() => result = MessageBoxW(IntPtr.Zero, text, PVXBranding.StudioName, type | MB_SETFOREGROUND | MB_TOPMOST));
+        var thread = new Thread(() => result = MessageBoxW(IntPtr.Zero, text, PVX.Core.PVXInfo.StudioName, type | MB_SETFOREGROUND | MB_TOPMOST));
         thread.SetApartmentState(ApartmentState.STA);
         thread.Start();
         thread.Join();
