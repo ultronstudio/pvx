@@ -21,38 +21,42 @@ namespace PVX.World.Playground;
 /// <summary>
 /// Manual-test playground game: boots the real PVX runtime (Gameplay +
 /// Interaction features, exactly like a production PVX game would), then
-/// builds a small scene — a door, a switch, a player with a real-physics
-/// interaction controller, and a diagnostic free-fly camera — to let a
-/// human actually play the interaction vertical slice end to end.
+/// loads its scene from the compiled <c>InteractionPlayground</c> asset —
+/// a door, a switch, and a player capsule with a real-physics interaction
+/// controller — to let a human actually play the interaction vertical
+/// slice end to end.
 /// </summary>
 /// <remarks>
 /// <para>
-/// This project now ships a real, GameStudio-openable package
+/// This project ships a real, GameStudio-openable package
 /// (<c>PVX.World.Playground.sdpkg</c>) with an authored
 /// <c>Assets/InteractionPlayground.sdscene</c> containing
 /// <see cref="PVXDoorComponent"/>, <see cref="PVXSwitchComponent"/> and
 /// <see cref="PVXInteractionPointComponent"/> with real property values,
-/// plus colliders, a camera, and a light. The asset compiler (run as part
-/// of this project's normal build via <c>StrideCompileAssets</c>) loads
-/// and validates it successfully — see the milestone's final report.
+/// plus colliders, a camera, and a light. <see cref="Content.Load{Scene}"/>
+/// of that asset is the canonical runtime path — this game does not
+/// reconstruct an equivalent scene in C#.
 /// </para>
 /// <para>
-/// This game still builds its own scene in code, rather than loading the
-/// compiled asset at runtime: loading it via <c>Content.Load&lt;Scene&gt;</c>
-/// hits an unresolved content-serialization gap ("No serializer available
-/// for type id ... and base type Stride.Engine.EntityComponent") for the
-/// custom component types, even with <c>StrideAssemblyProcessor</c>
-/// enabled on their owning projects. This is a genuine, disclosed
-/// limitation, not something papered over — see the final report's root
-/// cause section. The authored scene asset exists, compiles, and is a
-/// faithful description of the same scene built here in code; only the
-/// runtime hookup from "compiled asset" to "live Scene" remains open.
+/// Root cause of why that load used to fail ("No serializer available for
+/// type id ... and base type Stride.Engine.EntityComponent"): the
+/// serializer registration an AssemblyProcessor-generated module
+/// initializer installs for <c>PVX.World</c>/<c>PVX.Interaction.Stride</c>
+/// only runs once the CLR actually loads that assembly — and nothing in a
+/// from-scratch process had done so yet by the time the very first
+/// <c>Content.Load</c> ran, since merely referencing a type by name (a
+/// field type, a <c>using</c>) does not force that. <see cref="PVXContentRegistration.EnsureLoaded{T}"/>,
+/// called in this class's constructor before anything else, forces it
+/// deterministically instead of relying on an incidental earlier
+/// construction of one of these types to have done it by accident.
 /// </para>
 /// <para>
-/// Everything playground-specific (free-fly camera, switch→light sample
-/// binder, procedural placeholder visuals) lives in this project only.
-/// <c>PVX.World</c>/<c>PVX.Interaction.Stride</c> components know nothing
-/// about any of it.
+/// Everything playground-specific (free-fly camera, the interaction
+/// controller, the switch→light sample binder, procedural placeholder
+/// visuals) is attached in code, after loading, onto entities found by
+/// name in the loaded scene. <c>PVX.World</c>/<c>PVX.Interaction.Stride</c>
+/// components know nothing about any of it, and none of it is authored
+/// into the scene asset itself.
 /// </para>
 /// </remarks>
 public sealed class PVXWorldPlaygroundGame : PVXGame
@@ -63,9 +67,17 @@ public sealed class PVXWorldPlaygroundGame : PVXGame
     private bool smokeVerificationDone;
     private PVXDoorComponent? smokeDoor;
     private PVXSwitchComponent? smokeSwitch;
+    private Entity? smokeHandleEntity;
+    private PVXInteractionPointComponent? smokeHandle;
 
     public PVXWorldPlaygroundGame()
     {
+        // Must happen before anything in this process can hit the first
+        // Content.Load of a scene referencing a type from these assemblies
+        // (see PVXContentRegistration's remarks).
+        PVXContentRegistration.EnsureLoaded<PVXDoorComponent>();
+        PVXContentRegistration.EnsureLoaded<PVXInteractionPointComponent>();
+
         // Registration order matters: PVXInteractionFeature requires
         // PVXGameplaySession (registered by PVXGameplayFeature) to already
         // be in the service registry when it initializes.
@@ -77,15 +89,15 @@ public sealed class PVXWorldPlaygroundGame : PVXGame
     {
         await base.LoadContent();
 
-        SceneSystem.SceneInstance ??= new SceneInstance(Services) { RootScene = new Scene() };
-        var scene = SceneSystem.SceneInstance.RootScene;
+        var scene = Content.Load<Scene>("InteractionPlayground");
+        SceneSystem.SceneInstance = new SceneInstance(Services) { RootScene = scene };
 
         var session = Runtime.Services.GetRequired<PVXGameplaySession>();
         session.Start();
         session.Difficulty.SetDifficulty(new PVXDifficultyId("playground.default"));
         session.Player.RegisterProvider(new PlaygroundPlayerProvider());
 
-        BuildScene(scene);
+        DecorateScene(scene);
 
         Console.WriteLine("[PVX Playground] Ready.");
         Console.WriteLine("[PVX Playground] Mouse: look (hold right mouse button). W/A/S/D: move. E: interact. Esc: exit.");
@@ -140,8 +152,24 @@ public sealed class PVXWorldPlaygroundGame : PVXGame
 
         var door = smokeDoor ?? throw new InvalidOperationException("Smoke verification requested but no door was built.");
         var switchComponent = smokeSwitch ?? throw new InvalidOperationException("Smoke verification requested but no switch was built.");
+        var handle = smokeHandle ?? throw new InvalidOperationException("Smoke verification requested but no interaction point was found.");
+        var handleEntity = smokeHandleEntity ?? throw new InvalidOperationException("Smoke verification requested but no handle entity was found.");
 
         var ok = true;
+
+        // Authored property values survived the full
+        // PVX Studio -> asset compiler -> Content.Load round trip, not
+        // just the component types.
+        ok &= Check("Door OpenAngleDegrees authored value survived compile+load", door.OpenAngleDegrees == 100f);
+        ok &= Check("Door TransitionDuration authored value survived compile+load", door.TransitionDuration == 0.6f);
+        ok &= Check("Handle PointId authored value survived compile+load", handle.PointId == "handle");
+        ok &= Check("Handle Priority authored value survived compile+load", handle.Priority == 20);
+
+        // Hierarchy survived: Handle -> DoorPanel -> DoorLeaf, exactly as authored.
+        var doorPanelTransform = handleEntity.Transform.Parent;
+        var doorPanelEntity = doorPanelTransform?.Entity;
+        ok &= Check("Handle's parent is DoorPanel", doorPanelEntity?.Name == "DoorPanel");
+        ok &= Check("DoorPanel's parent is DoorLeaf", doorPanelTransform?.Parent?.Entity?.Name == "DoorLeaf");
 
         ok &= Check("Door initial state is Closed", door.State == PVXDoorState.Closed);
         ok &= Check("Door.TryOpen() returns true", door.TryOpen());
@@ -164,13 +192,22 @@ public sealed class PVXWorldPlaygroundGame : PVXGame
         return condition;
     }
 
-    private void BuildScene(Scene scene)
+    /// <summary>
+    /// Attaches everything that is deliberately NOT authored into
+    /// <c>InteractionPlayground.sdscene</c> — the free-fly camera, the
+    /// physics-raycast interaction controller, the graphics compositor,
+    /// the switch's light-indicator sample binder, and procedural
+    /// placeholder visuals for the colliders the asset already describes —
+    /// onto the entities the compiled scene actually produced. Every
+    /// transform, collider and PVX component value comes from the loaded
+    /// scene; nothing gameplay-relevant is reconstructed here.
+    /// </summary>
+    private void DecorateScene(Scene scene)
     {
-        var playerRoot = new Entity("PlayerRoot") { Transform = { Position = new Vector3(0, 1.6f, 0) } };
+        var playerRoot = FindEntity(scene, "PlayerRoot") ?? throw new InvalidOperationException("InteractionPlayground.sdscene has no 'PlayerRoot' entity.");
+        var cameraEntity = FindEntity(scene, "Camera") ?? throw new InvalidOperationException("InteractionPlayground.sdscene has no 'Camera' entity.");
+        var camera = cameraEntity.Get<CameraComponent>() ?? throw new InvalidOperationException("'Camera' entity has no CameraComponent.");
 
-        var cameraEntity = new Entity("Camera");
-        var camera = new CameraComponent { Projection = CameraProjectionMode.Perspective, VerticalFieldOfView = 60f };
-        cameraEntity.Add(camera);
         cameraEntity.Add(new PlaygroundFreeFlyCameraScript());
         cameraEntity.Add(new PVXStrideInteractionControllerComponent
         {
@@ -179,56 +216,24 @@ public sealed class PVXWorldPlaygroundGame : PVXGame
             MaxDistance = 3f,
             PrimaryInteractionKey = Keys.E,
         });
-        cameraEntity.Transform.Parent = playerRoot.Transform;
 
         SceneSystem.GraphicsCompositor = GraphicsCompositorHelper.CreateDefault(
             enablePostEffects: false,
             camera: camera,
             clearColor: new Color4(0.08f, 0.09f, 0.11f, 1f));
 
-        var lightEntity = new Entity("DirectionalLight") { Transform = { Rotation = Quaternion.RotationX(MathUtil.DegreesToRadians(-60f)) } };
-        lightEntity.Add(new LightComponent
-        {
-            Type = new LightDirectional { Color = new ColorRgbProvider(Color.White) },
-            Intensity = 4f,
-        });
+        AttachVisual(FindEntity(scene, "Ground"), new Vector3(20, 0.2f, 20), new Color(60, 64, 70));
+        AttachVisual(FindEntity(scene, "DoorPanel"), new Vector3(1f, 2f, 0.1f), new Color(150, 90, 60));
+        AttachVisual(FindEntity(scene, "Switch"), new Vector3(0.3f, 0.3f, 0.1f), new Color(90, 90, 100));
 
-        var ground = CreateVisualEntity(
-            "Ground",
-            position: new Vector3(0, -0.1f, 0),
-            size: new Vector3(20, 0.2f, 20),
-            color: new Color(60, 64, 70));
-        ground.Add(PlaygroundVisuals.CreateBoxCollider(new Vector3(20, 0.2f, 20)));
+        var doorLeaf = FindEntity(scene, "DoorLeaf") ?? throw new InvalidOperationException("InteractionPlayground.sdscene has no 'DoorLeaf' entity.");
+        smokeDoor = doorLeaf.Get<PVXDoorComponent>() ?? throw new InvalidOperationException("'DoorLeaf' entity has no PVXDoorComponent.");
 
-        // --- Door: DoorLeaf (pivot, no visual) -> DoorPanel (visual + collider) -> Handle (point) ---
-        var doorLeaf = new Entity("DoorLeaf") { Transform = { Position = new Vector3(-1.5f, 0, -4f) } };
-        var door = new PVXDoorComponent { OpenAngleDegrees = 100f, TransitionDuration = 0.6f };
-        doorLeaf.Add(door);
-        smokeDoor = door;
+        var switchEntity = FindEntity(scene, "Switch") ?? throw new InvalidOperationException("InteractionPlayground.sdscene has no 'Switch' entity.");
+        smokeSwitch = switchEntity.Get<PVXSwitchComponent>() ?? throw new InvalidOperationException("'Switch' entity has no PVXSwitchComponent.");
 
-        var doorPanel = CreateVisualEntity(
-            "DoorPanel",
-            position: new Vector3(0.5f, 1f, 0f), // offset half-width from the hinge at DoorLeaf's origin
-            size: new Vector3(1f, 2f, 0.1f),
-            color: new Color(150, 90, 60));
-        doorPanel.Add(PlaygroundVisuals.CreateBoxCollider(new Vector3(1f, 2f, 0.1f)));
-        doorPanel.Transform.Parent = doorLeaf.Transform;
-
-        var handle = new Entity("Handle") { Transform = { Position = new Vector3(0.4f, 0f, 0.1f) } };
-        handle.Add(PlaygroundVisuals.CreateBoxCollider(new Vector3(0.1f)));
-        handle.Add(new PVXInteractionPointComponent { PointId = "handle", Priority = 20 });
-        handle.Transform.Parent = doorPanel.Transform;
-
-        // --- Switch: visual + collider + light indicator toggled by a playground-only script ---
-        var switchEntity = CreateVisualEntity(
-            "Switch",
-            position: new Vector3(1.5f, 1f, -4f),
-            size: new Vector3(0.3f, 0.3f, 0.1f),
-            color: new Color(90, 90, 100));
-        switchEntity.Add(PlaygroundVisuals.CreateBoxCollider(new Vector3(0.3f, 0.3f, 0.1f)));
-        var switchComponent = new PVXSwitchComponent();
-        switchEntity.Add(switchComponent);
-        smokeSwitch = switchComponent;
+        smokeHandleEntity = FindEntity(scene, "Handle") ?? throw new InvalidOperationException("InteractionPlayground.sdscene has no 'Handle' entity.");
+        smokeHandle = smokeHandleEntity.Get<PVXInteractionPointComponent>() ?? throw new InvalidOperationException("'Handle' entity has no PVXInteractionPointComponent.");
 
         var indicatorEntity = new Entity("SwitchIndicator") { Transform = { Position = new Vector3(0, 0.3f, 0) } };
         var indicatorLight = new LightComponent
@@ -237,19 +242,44 @@ public sealed class PVXWorldPlaygroundGame : PVXGame
             Intensity = 0f,
         };
         indicatorEntity.Add(indicatorLight);
-        indicatorEntity.Add(new SwitchIndicatorScript(switchComponent, indicatorLight));
+        indicatorEntity.Add(new SwitchIndicatorScript(smokeSwitch, indicatorLight));
         indicatorEntity.Transform.Parent = switchEntity.Transform;
-
-        scene.Entities.Add(playerRoot);
-        scene.Entities.Add(lightEntity);
-        scene.Entities.Add(ground);
-        scene.Entities.Add(doorLeaf);
-        scene.Entities.Add(switchEntity);
     }
 
-    private Entity CreateVisualEntity(string name, Vector3 position, Vector3 size, Color color)
+    /// <summary>
+    /// Depth-first search for an entity by name across the whole scene
+    /// (root entities and every descendant reachable through
+    /// <see cref="TransformComponent.Children"/>), since the compiled
+    /// scene is a hierarchy rather than a flat, directly-indexable list.
+    /// </summary>
+    private static Entity? FindEntity(Scene scene, string name)
     {
-        var entity = new Entity(name) { Transform = { Position = position } };
+        foreach (var entity in scene.Entities)
+        {
+            if (FindEntity(entity, name) is { } found)
+                return found;
+        }
+        return null;
+    }
+
+    private static Entity? FindEntity(Entity entity, string name)
+    {
+        if (entity.Name == name)
+            return entity;
+
+        foreach (var child in entity.Transform.Children)
+        {
+            if (child.Entity is { } childEntity && FindEntity(childEntity, name) is { } found)
+                return found;
+        }
+
+        return null;
+    }
+
+    private void AttachVisual(Entity? entity, Vector3 size, Color color)
+    {
+        if (entity is null)
+            return;
 
         var model = new Model();
         new ProceduralModelDescriptor(new CubeProceduralModel { Size = size }).GenerateModel(Services, model);
@@ -263,7 +293,6 @@ public sealed class PVXWorldPlaygroundGame : PVXGame
         }));
 
         entity.Add(new ModelComponent { Model = model });
-        return entity;
     }
 
     private sealed class PlaygroundPlayer : IPVXPlayer

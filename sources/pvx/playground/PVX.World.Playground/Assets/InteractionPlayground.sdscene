@@ -178,5 +178,4 @@ Hierarchy:
                         Type: !LightDirectional
                             Color: !ColorRgbProvider
                                 Value: {R: 1.0, G: 1.0, B: 1.0}
-                            Shadow: null
                         Intensity: 4.0
