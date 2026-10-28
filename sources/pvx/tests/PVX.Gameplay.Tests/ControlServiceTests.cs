@@ -88,6 +88,39 @@ public class ControlServiceTests
     }
 
     [Fact]
+    public void AcquireRestriction_WhenCapabilitiesChangedSubscriberThrows_RollsBack()
+    {
+        var control = new PVXControlService();
+        control.CapabilitiesChanged += (_, _) => throw new InvalidOperationException("boom");
+
+        Assert.Throws<InvalidOperationException>(
+            () => control.AcquireRestriction(PVXControlCapabilities.Look));
+
+        Assert.Equal(PVXControlCapabilities.All, control.EffectiveCapabilities);
+    }
+
+    [Fact]
+    public void AcquireRestriction_AfterRolledBackFailure_ServiceStillUsable()
+    {
+        var control = new PVXControlService();
+        var shouldThrow = true;
+        control.CapabilitiesChanged += (_, _) =>
+        {
+            if (shouldThrow)
+                throw new InvalidOperationException("boom");
+        };
+
+        Assert.Throws<InvalidOperationException>(
+            () => control.AcquireRestriction(PVXControlCapabilities.Look));
+        Assert.Equal(PVXControlCapabilities.All, control.EffectiveCapabilities);
+
+        shouldThrow = false;
+        using var restriction = control.AcquireRestriction(PVXControlCapabilities.Move);
+
+        Assert.Equal(PVXControlCapabilities.Move, control.EffectiveCapabilities);
+    }
+
+    [Fact]
     public void CapabilitiesChanged_FiresOnlyWhenEffectiveValueChanges()
     {
         var control = new PVXControlService();

@@ -199,15 +199,11 @@ public sealed class PVXGameplaySession
         if (Control.EffectiveCapabilities == PVXControlCapabilities.None)
             return;
 
-        try
-        {
-            lifecycleSuspension = Control.AcquireRestriction(PVXControlCapabilities.None, owner: this);
-        }
-        catch
-        {
-            // The Faulted state itself is what matters here; swallowing a
-            // secondary failure keeps the original lifecycle exception
-            // (the caller's catch re-throws it) as the one that surfaces.
-        }
+        // Uses the non-notifying path, not the public AcquireRestriction:
+        // we're very likely here because a CapabilitiesChanged subscriber
+        // just threw, and the public, notifying overload would re-enter
+        // that same subscriber, roll itself back on failure (by design,
+        // for ordinary callers), and leave this session un-suppressed.
+        lifecycleSuspension = Control.AcquireRestrictionWithoutNotification(PVXControlCapabilities.None, owner: this);
     }
 }
