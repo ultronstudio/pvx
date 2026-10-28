@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Stride.Core.Reflection;
 
 namespace Stride.AssetCompiler
 {
@@ -10,6 +11,12 @@ namespace Stride.AssetCompiler
     {
         private static int Main(string[] args)
         {
+            // Must run before any compiler/command touches a vendored binary with
+            // a stale baked-in assembly identity (e.g. BulletSharp.NetStandard.dll
+            // against a renamed/rebranded Stride.Core AssemblyVersion) — see
+            // AssemblyIdentityFallbackResolver's remarks.
+            AssemblyIdentityFallbackResolver.Install();
+
             try
             {
                 // Running first time? If yes, create nuget redirect package.

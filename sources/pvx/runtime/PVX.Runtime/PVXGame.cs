@@ -1,4 +1,5 @@
 using PVX.Runtime.Internal;
+using Stride.Core.Reflection;
 using Stride.Engine;
 
 namespace PVX.Runtime;
@@ -8,6 +9,15 @@ namespace PVX.Runtime;
 /// </summary>
 public class PVXGame : Game
 {
+    static PVXGame()
+    {
+        // Must run before anything in the process can touch a vendored binary
+        // with a stale baked-in assembly identity (see
+        // AssemblyIdentityFallbackResolver's remarks). A static constructor is
+        // the earliest hook available to every PVXGame subclass.
+        AssemblyIdentityFallbackResolver.Install();
+    }
+
     public PVXGame()
     {
         Runtime = new PVXRuntime();

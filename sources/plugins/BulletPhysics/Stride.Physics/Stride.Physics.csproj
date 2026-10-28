@@ -23,6 +23,15 @@
     <Reference Include="BulletSharp">
       <HintPath>..\..\..\..\deps\BulletPhysics\$(StrideBulletPlatform)\BulletSharp.NetStandard.dll</HintPath>
     </Reference>
+    <!-- The .NET SDK's own Reference-copy-local mechanism does not reliably deposit
+         BulletSharp.NetStandard.pdb into this project's own output (observed: the
+         .dll is copied, the .pdb is not), which breaks a downstream project
+         reference (e.g. Stride.Physics.Assets) that tries to propagate it onward
+         from here with a hard MSB3030 "file not found" error. Copy it explicitly. -->
+    <None Include="..\..\..\..\deps\BulletPhysics\$(StrideBulletPlatform)\BulletSharp.NetStandard.pdb" Condition="Exists('..\..\..\..\deps\BulletPhysics\$(StrideBulletPlatform)\BulletSharp.NetStandard.pdb')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>BulletSharp.NetStandard.pdb</Link>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\shared\SharedAssemblyInfo.cs">
