@@ -1,0 +1,30 @@
+<Project>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'Directory.Build.props'))/sdk/Stride.Build.Sdk/Sdk/Sdk.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'Directory.Build.props'))/pvx/PVX.Version.props" />
+
+  <PropertyGroup>
+    <Description>Minimal runnable sandbox exercising the PVX runtime lifecycle end to end.</Description>
+
+    <AssemblyName>PVX.Sandbox</AssemblyName>
+    <RootNamespace>PVX.Sandbox</RootNamespace>
+
+    <TargetFrameworks>$(StrideRuntimeTargetFrameworks)</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+
+    <AssemblyTitle>PVX.Sandbox</AssemblyTitle>
+    <Product>PVX Engine</Product>
+    <Company>ultron01</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\runtime\PVX.Runtime\PVX.Runtime.csproj" />
+  </ItemGroup>
+
+  <Import Project="$(StrideRoot)sources/sdk/Stride.Build.Sdk/Sdk/Sdk.targets" />
+</Project>

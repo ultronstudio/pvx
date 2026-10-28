@@ -1,12 +1,13 @@
 <Project>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'Directory.Build.props'))/sdk/Stride.Build.Sdk/Sdk/Sdk.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'Directory.Build.props'))/pvx/PVX.Version.props" />
 
   <PropertyGroup>
     <Description>Core primitives, metadata and contracts for PVX Engine.</Description>
 
     <AssemblyName>PVX.Core</AssemblyName>
     <RootNamespace>PVX.Core</RootNamespace>
-    
+
     <TargetFrameworks>$(StrideRuntimeTargetFrameworks)</TargetFrameworks>
 
     <ImplicitUsings>enable</ImplicitUsings>
@@ -14,16 +15,10 @@
     <LangVersion>latest</LangVersion>
 
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
-    
+
     <AssemblyTitle>PVX.Core</AssemblyTitle>
     <Product>PVX Engine</Product>
     <Company>ultron01</Company>
-
-    <Version>0.1.0</Version>
-    <AssemblyVersion>0.1.0.0</AssemblyVersion>
-    <FileVersion>0.1.0.0</FileVersion>
-
-    <InformationalVersion>0.1.0-dev</InformationalVersion>
   </PropertyGroup>
 
   <Import Project="$(StrideRoot)sources/sdk/Stride.Build.Sdk/Sdk/Sdk.targets" />

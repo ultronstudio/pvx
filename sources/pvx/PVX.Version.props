@@ -1,0 +1,39 @@
+<Project>
+
+  <!--
+    ================================================================
+    PVX.Version.props - Single MSBuild source of PVX Engine versioning
+    ================================================================
+
+    Every PVX assembly (PVX.Core, PVX.Runtime, ...) imports this file and
+    must not redeclare <Version>, <AssemblyVersion>, <FileVersion> or
+    <InformationalVersion> itself.
+
+    To release a new PVX version, change PVXVersionPrefix and/or
+    PVXVersionSuffix below ONLY. Everything else is derived.
+
+    Examples:
+      PVXVersionPrefix=0.2.0, PVXVersionSuffix=dev    -> 0.2.0-dev
+      PVXVersionPrefix=0.2.0, PVXVersionSuffix=beta1  -> 0.2.0-beta1
+      PVXVersionPrefix=0.2.0, PVXVersionSuffix=(empty) -> 0.2.0
+
+    PVX.Core/PVXVersion.cs does not duplicate these values: it reads the
+    AssemblyVersion/InformationalVersion assembly attributes that
+    GenerateAssemblyInfo produces from the properties below.
+    ================================================================
+  -->
+
+  <PropertyGroup>
+    <PVXVersionPrefix>0.1.0</PVXVersionPrefix>
+    <PVXVersionSuffix>dev</PVXVersionSuffix>
+
+    <PVXInformationalVersion Condition="'$(PVXVersionSuffix)' != ''">$(PVXVersionPrefix)-$(PVXVersionSuffix)</PVXInformationalVersion>
+    <PVXInformationalVersion Condition="'$(PVXVersionSuffix)' == ''">$(PVXVersionPrefix)</PVXInformationalVersion>
+
+    <Version>$(PVXInformationalVersion)</Version>
+    <AssemblyVersion>$(PVXVersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(PVXVersionPrefix).0</FileVersion>
+    <InformationalVersion>$(PVXInformationalVersion)</InformationalVersion>
+  </PropertyGroup>
+
+</Project>

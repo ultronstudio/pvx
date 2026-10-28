@@ -108,9 +108,17 @@ public sealed class PVXRuntime
         if (State != PVXRuntimeState.Running)
             return;
 
-        foreach (var feature in features)
+        try
         {
-            feature.Update(in time);
+            foreach (var feature in features)
+            {
+                feature.Update(in time);
+            }
+        }
+        catch
+        {
+            State = PVXRuntimeState.Faulted;
+            throw;
         }
     }
 

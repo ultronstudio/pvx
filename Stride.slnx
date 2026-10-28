@@ -81,6 +81,9 @@
     <Project Path="sources/pvx/core/PVX.Core/PVX.Core.csproj" />
     <Project Path="sources/pvx/runtime/PVX.Runtime/PVX.Runtime.csproj" />
   </Folder>
+  <Folder Name="/19-PVX.Tests/">
+    <Project Path="sources/pvx/tests/PVX.Sandbox/PVX.Sandbox.csproj" />
+  </Folder>
   <Folder Name="/20-StrideRuntime/">
     <Project Path="sources/engine/Stride.Assets.Generators/Stride.Assets.Generators.csproj" />
     <Project Path="sources/engine/Stride.Engine/Stride.Engine.csproj" />
