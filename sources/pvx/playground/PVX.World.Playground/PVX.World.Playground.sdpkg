@@ -1,0 +1,7 @@
+!Package
+Id: 9e33a0a2-4ac9-42ac-adfe-befd8c6e6730
+SerializedVersion: {Assets: 3.1.0.0}
+AssetFolders:
+    -   Path: !dir Assets
+RootAssets:
+    - 0da2a4a4-1325-4a44-ac62-054834ac7474:InteractionPlayground

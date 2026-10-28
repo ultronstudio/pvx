@@ -19,6 +19,16 @@
     <AssemblyTitle>PVX.Interaction.Stride</AssemblyTitle>
     <Product>PVX Engine</Product>
     <Company>ultron01</Company>
+
+    <!-- PVXInteractionPointComponent/PVXStrideInteractionControllerComponent are
+         entity component asset types: a consuming game's asset compiler must
+         load this assembly to deserialize them out of a .sdscene. -->
+    <StrideContainsAssetTypes>true</StrideContainsAssetTypes>
+
+    <!-- Generates the binary content (DataSerializer) registration these
+         components need to be loaded at runtime out of a compiled scene, not
+         just constructed directly in C# as every prior milestone did. -->
+    <StrideAssemblyProcessor>true</StrideAssemblyProcessor>
   </PropertyGroup>
 
   <ItemGroup>

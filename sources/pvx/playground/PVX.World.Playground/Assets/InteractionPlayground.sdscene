@@ -1,0 +1,182 @@
+!SceneAsset
+Id: 0da2a4a4-1325-4a44-ac62-054834ac7474
+SerializedVersion: {Stride: 2.1.0.1}
+Tags: []
+ChildrenIds: []
+Offset: {X: 0.0, Y: 0.0, Z: 0.0}
+Hierarchy:
+    RootParts:
+        - ref!! 20422ec9-c695-4546-9c23-cd07bb0fad8f
+        - ref!! 1430c404-1c2b-44bf-abb5-b43ab0498901
+        - ref!! 4b4663f3-0840-4fda-8375-3fb804af302e
+        - ref!! ba39aa2c-bffb-4536-bd03-da84c18e461b
+        - ref!! 20634c4a-e953-4265-93c2-c1ebc008c251
+    Parts:
+        -   Entity:
+                Id: 20422ec9-c695-4546-9c23-cd07bb0fad8f
+                Name: PlayerRoot
+                Components:
+                    05b65e289fc2434eb151dd8f19464d2d: !TransformComponent
+                        Id: 1a894d53-abb9-4eef-9027-6dc78e6c6abc
+                        Position: {X: 0.0, Y: 1.6, Z: 0.0}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children:
+                            0f057a850e554d3baf63fba4b795737d: ref!! 952b2900-b24c-4dfe-b87d-cd1549b623ee
+        -   Entity:
+                Id: 38da4890-7aa4-4442-87f4-25dd62159c3b
+                Name: Camera
+                Components:
+                    6b01aec6bd2040a38886c9a20215be7a: !TransformComponent
+                        Id: 952b2900-b24c-4dfe-b87d-cd1549b623ee
+                        Position: {X: 0.0, Y: 0.0, Z: 0.0}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children: {}
+                    a777e6b28ab644bc909af9af61bd4bce: !CameraComponent
+                        Id: 65b17dc6-c0ff-4743-9cfd-aa7aa31d3934
+                        Name: null
+                        Projection: Perspective
+                        VerticalFieldOfView: 60.0
+        -   Entity:
+                Id: 1430c404-1c2b-44bf-abb5-b43ab0498901
+                Name: Ground
+                Components:
+                    68a0a7bb68bf4f16b5babbdcf9e6e9a7: !TransformComponent
+                        Id: 759ea4f2-0339-4896-a58a-32b36023feb4
+                        Position: {X: 0.0, Y: -0.1, Z: 0.0}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children: {}
+                    ee72cfa40d8d4ab5866768dc07ebf363: !StaticColliderComponent
+                        Id: 3595335d-1f7d-499b-baff-3e7c62732915
+                        CanSleep: false
+                        Restitution: 0.0
+                        Friction: 0.5
+                        RollingFriction: 0.0
+                        CcdMotionThreshold: 0.0
+                        CcdSweptSphereRadius: 0.0
+                        IsTrigger: false
+                        ColliderShapes:
+                            dc787b66d27b449b8917c6e464486b7e: !BoxColliderShapeDesc
+                                Is2D: false
+                                Size: {X: 20.0, Y: 0.2, Z: 20.0}
+                                LocalOffset: {X: 0.0, Y: 0.0, Z: 0.0}
+                                LocalRotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+        -   Entity:
+                Id: 4b4663f3-0840-4fda-8375-3fb804af302e
+                Name: DoorLeaf
+                Components:
+                    4b16885d13814646aa9994cdf0d56ae5: !TransformComponent
+                        Id: 1a47840b-ca13-41ca-a461-d92d3da9e360
+                        Position: {X: -1.5, Y: 0.0, Z: -4.0}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children:
+                            6e28d769ffb841169a8f82e48a4f6e15: ref!! 0dcfa0ae-7d62-417b-b4b7-307884b6e051
+                    ab0a861d45c5489daf2c9862f5b9c3c0: !PVXDoorComponent
+                        Id: d8f1b8c8-7ea6-48e9-a70a-0310dcb339b5
+                        OpenAngleDegrees: 100.0
+                        TransitionDuration: 0.6
+                        StartsOpen: false
+                        LocalHingeAxis: {X: 0.0, Y: 1.0, Z: 0.0}
+        -   Entity:
+                Id: 44bc6b2e-e007-4fd3-b72a-a53e3703a780
+                Name: DoorPanel
+                Components:
+                    f13dbc57d29b48b29b7bd070a95b46db: !TransformComponent
+                        Id: 0dcfa0ae-7d62-417b-b4b7-307884b6e051
+                        Position: {X: 0.5, Y: 1.0, Z: 0.0}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children:
+                            f5131da506a9495aa7d01bebad713e43: ref!! 425701c3-092b-4c38-a319-1c8d95dda9ab
+                    d552f6b34ff14ef6ac83551cee4895d5: !StaticColliderComponent
+                        Id: b230a0e9-a9b1-4490-96d9-a3305531ab07
+                        CanSleep: false
+                        Restitution: 0.0
+                        Friction: 0.5
+                        RollingFriction: 0.0
+                        CcdMotionThreshold: 0.0
+                        CcdSweptSphereRadius: 0.0
+                        IsTrigger: false
+                        ColliderShapes:
+                            8e9974daac5c47c8b2fb5d5ec438a756: !BoxColliderShapeDesc
+                                Is2D: false
+                                Size: {X: 1.0, Y: 2.0, Z: 0.1}
+                                LocalOffset: {X: 0.0, Y: 0.0, Z: 0.0}
+                                LocalRotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+        -   Entity:
+                Id: 39ddfc51-fd0b-403d-a7e9-96e759aa6d67
+                Name: Handle
+                Components:
+                    71a0af986c794df9b57e6f23f3dd4b3e: !TransformComponent
+                        Id: 425701c3-092b-4c38-a319-1c8d95dda9ab
+                        Position: {X: 0.4, Y: 0.0, Z: 0.1}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children: {}
+                    fb6edf2c4965471bbc28edcfa6432a83: !StaticColliderComponent
+                        Id: 2c9326c2-7c90-44b1-a81e-70e598c75c21
+                        CanSleep: false
+                        Restitution: 0.0
+                        Friction: 0.5
+                        RollingFriction: 0.0
+                        CcdMotionThreshold: 0.0
+                        CcdSweptSphereRadius: 0.0
+                        IsTrigger: false
+                        ColliderShapes:
+                            72d23f04badb4f0f918180b154af0aa3: !BoxColliderShapeDesc
+                                Is2D: false
+                                Size: {X: 0.1, Y: 0.1, Z: 0.1}
+                                LocalOffset: {X: 0.0, Y: 0.0, Z: 0.0}
+                                LocalRotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                    29af9258a91e42a185e018a424ed3eba: !PVXInteractionPointComponent
+                        Id: 9e1bb401-ddb9-4e0f-aa19-7258ac3c3c05
+                        PointId: handle
+                        Priority: 20
+        -   Entity:
+                Id: ba39aa2c-bffb-4536-bd03-da84c18e461b
+                Name: Switch
+                Components:
+                    97aa87d075f1433b930cd44fc5f382e2: !TransformComponent
+                        Id: 92c0ccf7-3556-4fec-8613-298e0dfafd69
+                        Position: {X: 1.5, Y: 1.0, Z: -4.0}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children: {}
+                    b8b7072e605d4fbab06af5ea814b67f4: !PVXSwitchComponent
+                        Id: 1d371f85-c1e5-4905-9f0a-5e7245b18efe
+                        StartsOn: false
+                    6a7a6f9e5a3a4e46a4a1a8f0e4a8b2d1: !StaticColliderComponent
+                        Id: 849395a4-f7d8-48ee-91a6-d3c12297dca1
+                        CanSleep: false
+                        Restitution: 0.0
+                        Friction: 0.5
+                        RollingFriction: 0.0
+                        CcdMotionThreshold: 0.0
+                        CcdSweptSphereRadius: 0.0
+                        IsTrigger: false
+                        ColliderShapes:
+                            3b2c5e7a1d9c4f3eae4b6c8d2f1a9b7c: !BoxColliderShapeDesc
+                                Is2D: false
+                                Size: {X: 0.3, Y: 0.3, Z: 0.1}
+                                LocalOffset: {X: 0.0, Y: 0.0, Z: 0.0}
+                                LocalRotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+        -   Entity:
+                Id: 20634c4a-e953-4265-93c2-c1ebc008c251
+                Name: DirectionalLight
+                Components:
+                    d1a9c3e5f7b24a6e8c0d2e4f6a8b0c2d: !TransformComponent
+                        Id: 9f2b30f5-641e-45cc-8c09-3af802dae3a6
+                        Position: {X: 0.0, Y: 3.0, Z: 0.0}
+                        Rotation: {X: -0.4397899, Y: 0.0, Z: 0.0, W: 0.8980275}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children: {}
+                    c2e4a6b8d0f21e3a5c7d9f1b3a5c7e9f: !LightComponent
+                        Id: 8de1d1d0-326c-4622-9cd9-3a4b90dac4e1
+                        Type: !LightDirectional
+                            Color: !ColorRgbProvider
+                                Value: {R: 1.0, G: 1.0, B: 1.0}
+                            Shadow: null
+                        Intensity: 4.0

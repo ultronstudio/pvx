@@ -20,6 +20,13 @@
     <AssemblyTitle>PVX.World.Playground</AssemblyTitle>
     <Product>PVX Engine</Product>
     <Company>ultron01</Company>
+
+    <!-- Makes this a real, GameStudio-openable package (Assets/InteractionPlayground.sdscene)
+         instead of a code-only scene. Asset compilation also bundles the engine's own shader
+         sources into the output data/ folder, which is required even for procedural,
+         code-created materials: Stride's shader mixins (e.g. ShaderBase) are themselves
+         compiled game assets, not something embedded in the engine DLLs. -->
+    <StrideCompileAssets>true</StrideCompileAssets>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,5 +41,15 @@
     <ProjectReference Include="..\..\..\plugins\BulletPhysics\Stride.Physics\Stride.Physics.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="PVX.World.Playground.sdpkg" />
+  </ItemGroup>
+
   <Import Project="$(StrideRoot)sources/sdk/Stride.Build.Sdk/Sdk/Sdk.targets" />
+
+  <!-- Not imported by the base Stride.Build.Sdk (only Stride.Build.Sdk.Tests pulls this in):
+       wire it in explicitly rather than switching this executable's SDK identity to the test
+       variant just to get asset compilation. -->
+  <Import Condition="'$(StrideCompileAssets)' == 'true' And '$(StrideCompilerTargetsEnable)' != 'false'"
+          Project="$(StrideRoot)sources\assets\Stride.AssetCompiler\build\Stride.AssetCompiler.targets" />
 </Project>
