@@ -82,11 +82,13 @@
     <Project Path="sources/pvx/runtime/PVX.Runtime/PVX.Runtime.csproj" />
     <Project Path="sources/pvx/gameplay/PVX.Gameplay/PVX.Gameplay.csproj" />
     <Project Path="sources/pvx/interaction/PVX.Interaction/PVX.Interaction.csproj" />
+    <Project Path="sources/pvx/interaction/PVX.Interaction.Stride/PVX.Interaction.Stride.csproj" />
   </Folder>
   <Folder Name="/19-PVX.Tests/">
     <Project Path="sources/pvx/tests/PVX.Sandbox/PVX.Sandbox.csproj" />
     <Project Path="sources/pvx/tests/PVX.Gameplay.Tests/PVX.Gameplay.Tests.csproj" />
     <Project Path="sources/pvx/tests/PVX.Interaction.Tests/PVX.Interaction.Tests.csproj" />
+    <Project Path="sources/pvx/tests/PVX.Interaction.Stride.Tests/PVX.Interaction.Stride.Tests.csproj" />
   </Folder>
   <Folder Name="/20-StrideRuntime/">
     <Project Path="sources/engine/Stride.Assets.Generators/Stride.Assets.Generators.csproj" />
