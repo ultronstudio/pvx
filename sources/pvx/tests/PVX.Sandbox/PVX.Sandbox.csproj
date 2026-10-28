@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\runtime\PVX.Runtime\PVX.Runtime.csproj" />
+    <ProjectReference Include="..\..\gameplay\PVX.Gameplay\PVX.Gameplay.csproj" />
   </ItemGroup>
 
   <Import Project="$(StrideRoot)sources/sdk/Stride.Build.Sdk/Sdk/Sdk.targets" />

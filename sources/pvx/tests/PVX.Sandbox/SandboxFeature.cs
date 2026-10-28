@@ -1,3 +1,4 @@
+using PVX.Gameplay;
 using PVX.Runtime;
 
 namespace PVX.Sandbox;
@@ -25,6 +26,8 @@ public sealed class SandboxFeature : PVXRuntimeFeature
     {
         Console.WriteLine("[PVX Sandbox] Initialize");
         Console.WriteLine($"[PVX Sandbox] Runtime: PVX Engine {context.Runtime.EngineVersion}");
+
+        RunGameplayDemo(context);
     }
 
     public override void Update(in PVXFrameTime time)
@@ -45,5 +48,57 @@ public sealed class SandboxFeature : PVXRuntimeFeature
     public override void Shutdown()
     {
         Console.WriteLine("[PVX Sandbox] Shutdown");
+    }
+
+    /// <summary>
+    /// Exercises PVX.Gameplay through the <see cref="PVXGameplaySession"/>
+    /// registered by <see cref="PVXGameplayFeature"/>: lifecycle, primary
+    /// player, difficulty, and composable control restrictions.
+    /// </summary>
+    private void RunGameplayDemo(PVXRuntimeContext context)
+    {
+        var session = context.Services.GetRequired<PVXGameplaySession>();
+
+        Console.WriteLine($"[PVX Sandbox] Gameplay state: {session.State}");
+
+        session.Start();
+        Console.WriteLine($"[PVX Sandbox] Gameplay state: {session.State}");
+
+        session.Difficulty.SetDifficulty(new PVXDifficultyId("sandbox.normal"));
+        Console.WriteLine($"[PVX Sandbox] Difficulty: {session.Difficulty.Current}");
+
+        session.Player.RegisterProvider(new SandboxPlayerProvider());
+        Console.WriteLine("[PVX Sandbox] Primary player registered");
+
+        Console.WriteLine($"[PVX Sandbox] Controls: {session.Control.EffectiveCapabilities}");
+
+        using (session.Control.AcquireRestriction(PVXControlCapabilities.Look, owner: this))
+        {
+            Console.WriteLine($"[PVX Sandbox] Controls: {session.Control.EffectiveCapabilities}");
+
+            session.Pause();
+            Console.WriteLine($"[PVX Sandbox] Gameplay state: {session.State}");
+            Console.WriteLine($"[PVX Sandbox] Controls: {session.Control.EffectiveCapabilities}");
+
+            session.Resume();
+            Console.WriteLine($"[PVX Sandbox] Gameplay state: {session.State}");
+            Console.WriteLine($"[PVX Sandbox] Controls: {session.Control.EffectiveCapabilities}");
+        }
+
+        Console.WriteLine($"[PVX Sandbox] Controls: {session.Control.EffectiveCapabilities}");
+
+        session.End();
+        Console.WriteLine($"[PVX Sandbox] Gameplay state: {session.State}");
+    }
+
+    private sealed class SandboxPlayer : IPVXPlayer
+    {
+    }
+
+    private sealed class SandboxPlayerProvider : IPVXPlayerProvider
+    {
+        private readonly SandboxPlayer player = new();
+
+        public IPVXPlayer? GetPrimaryPlayer() => player;
     }
 }
