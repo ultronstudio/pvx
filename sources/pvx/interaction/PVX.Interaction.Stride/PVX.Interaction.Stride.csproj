@@ -23,9 +23,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PVX.Interaction\PVX.Interaction.csproj" />
+    <ProjectReference Include="..\..\runtime\PVX.Runtime\PVX.Runtime.csproj" />
 
     <ProjectReference Include="..\..\..\core\Stride.Core.Mathematics\Stride.Core.Mathematics.csproj" />
     <ProjectReference Include="..\..\..\engine\Stride.Engine\Stride.Engine.csproj" />
+    <ProjectReference Include="..\..\..\engine\Stride.Input\Stride.Input.csproj" />
     <ProjectReference Include="..\..\..\plugins\BulletPhysics\Stride.Physics\Stride.Physics.csproj" />
   </ItemGroup>
 

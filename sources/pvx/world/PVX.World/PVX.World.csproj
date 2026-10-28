@@ -1,0 +1,45 @@
+<Project>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'Directory.Build.props'))/sdk/Stride.Build.Sdk/Sdk/Sdk.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'Directory.Build.props'))/pvx/PVX.Version.props" />
+
+  <PropertyGroup>
+    <Description>Reusable world/environment interactables for PVX Engine (doors, switches, ...), built on PVX.Interaction and real Stride entities.</Description>
+
+    <AssemblyName>PVX.World</AssemblyName>
+    <RootNamespace>PVX.World</RootNamespace>
+
+    <TargetFrameworks>$(StrideRuntimeTargetFrameworks)</TargetFrameworks>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+
+    <AssemblyTitle>PVX.World</AssemblyTitle>
+    <Product>PVX Engine</Product>
+    <Company>ultron01</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\interaction\PVX.Interaction\PVX.Interaction.csproj" />
+
+    <ProjectReference Include="..\..\..\core\Stride.Core.Mathematics\Stride.Core.Mathematics.csproj" />
+    <ProjectReference Include="..\..\..\engine\Stride.Engine\Stride.Engine.csproj" />
+
+    <!--
+      PVX.World deliberately does NOT depend on PVX.Interaction.Stride: it
+      owns interaction behavior (Door/Switch), not physics targeting — see
+      its own remarks for the architecture reasoning.
+
+      It does need Stride.Physics narrowly, for PhysicsComponent.UpdatePhysicsTransformation():
+      PVXDoorComponent animates its own entity's (and its collider-bearing
+      descendants') transform and must push that into Bullet's collision
+      world itself, since static colliders are not re-synced automatically
+      after attach (see PVXDoorProcessor's own remarks).
+    -->
+    <ProjectReference Include="..\..\..\plugins\BulletPhysics\Stride.Physics\Stride.Physics.csproj" />
+  </ItemGroup>
+
+  <Import Project="$(StrideRoot)sources/sdk/Stride.Build.Sdk/Sdk/Sdk.targets" />
+</Project>

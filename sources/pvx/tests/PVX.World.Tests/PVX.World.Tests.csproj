@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\world\PVX.World\PVX.World.csproj" />
+    <ProjectReference Include="..\..\interaction\PVX.Interaction.Stride\PVX.Interaction.Stride.csproj" />
+    <ProjectReference Include="..\..\gameplay\PVX.Gameplay\PVX.Gameplay.csproj" />
+  </ItemGroup>
+
+  <!--
+    Plain Microsoft.NET.Sdk test project: does not inherit Stride.Build.Sdk's
+    <StrideNativeLib> wiring, so the native Bullet backend must be copied
+    manually (same fix as PVX.Interaction.Stride.Tests).
+  -->
+  <ItemGroup>
+    <None Include="..\..\..\..\deps\BulletPhysics\dotnet\**\libbulletc.*">
+      <Link>runtimes\%(RecursiveDir)native\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

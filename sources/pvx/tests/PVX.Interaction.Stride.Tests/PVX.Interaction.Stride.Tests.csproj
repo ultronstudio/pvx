@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\interaction\PVX.Interaction.Stride\PVX.Interaction.Stride.csproj" />
     <ProjectReference Include="..\..\gameplay\PVX.Gameplay\PVX.Gameplay.csproj" />
+    <ProjectReference Include="..\..\runtime\PVX.Runtime\PVX.Runtime.csproj" />
   </ItemGroup>
 
   <!--
