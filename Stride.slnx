@@ -86,10 +86,16 @@
     <Project Path="sources/pvx/world/PVX.World/PVX.World.csproj" />
     <Project Path="sources/pvx/firstperson/PVX.FirstPerson/PVX.FirstPerson.csproj" />
     <Project Path="sources/pvx/templates/PVX.Templates.Games/PVX.Templates.Games.csproj" />
+    <Project Path="sources/pvx/persistence/PVX.Persistence/PVX.Persistence.csproj" />
+    <Project Path="sources/pvx/dialogue/PVX.Dialogue/PVX.Dialogue.csproj" />
+    <Project Path="sources/pvx/cinematics/PVX.Cinematics/PVX.Cinematics.csproj" />
   </Folder>
   <Folder Name="/19-PVX.Tests/">
     <Project Path="sources/pvx/tests/PVX.Sandbox/PVX.Sandbox.csproj" />
     <Project Path="sources/pvx/tests/PVX.Gameplay.Tests/PVX.Gameplay.Tests.csproj" />
+    <Project Path="sources/pvx/tests/PVX.Persistence.Tests/PVX.Persistence.Tests.csproj" />
+    <Project Path="sources/pvx/tests/PVX.Dialogue.Tests/PVX.Dialogue.Tests.csproj" />
+    <Project Path="sources/pvx/tests/PVX.Cinematics.Tests/PVX.Cinematics.Tests.csproj" />
     <Project Path="sources/pvx/tests/PVX.Interaction.Tests/PVX.Interaction.Tests.csproj" />
     <Project Path="sources/pvx/tests/PVX.Interaction.Stride.Tests/PVX.Interaction.Stride.Tests.csproj" />
     <Project Path="sources/pvx/tests/PVX.World.Tests/PVX.World.Tests.csproj" />

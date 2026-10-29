@@ -1,0 +1,48 @@
+<Project>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'Directory.Build.props'))/sdk/Stride.Build.Sdk/Sdk/Sdk.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'Directory.Build.props'))/pvx/PVX.Version.props" />
+
+  <PropertyGroup>
+    <Description>Minimal waypoint-sequence cinematic/cutscene camera-rig primitive for PVX Engine.</Description>
+
+    <AssemblyName>PVX.Cinematics</AssemblyName>
+    <RootNamespace>PVX.Cinematics</RootNamespace>
+
+    <TargetFrameworks>$(StrideRuntimeTargetFrameworks)</TargetFrameworks>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+
+    <AssemblyTitle>PVX.Cinematics</AssemblyTitle>
+    <Product>PVX Engine</Product>
+    <Company>ultron01</Company>
+
+    <!-- PVXCinematicComponent is an entity component asset type: a
+         consuming game's asset compiler must load this assembly to
+         deserialize it out of a .sdscene. -->
+    <StrideContainsAssetTypes>true</StrideContainsAssetTypes>
+
+    <!-- Generates the binary content (DataSerializer) registration this
+         component needs to be loaded at runtime out of a compiled scene. -->
+    <StrideAssemblyProcessor>true</StrideAssemblyProcessor>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      PVXCinematicProcessor (not PVXCinematicComponent itself, which stays
+      pure Stride transform animation like PVXDoorComponent) needs
+      PVX.Gameplay/PVX.Runtime to optionally strip player control for the
+      cutscene's duration via PVXGameplaySession.Control.
+    -->
+    <ProjectReference Include="..\..\runtime\PVX.Runtime\PVX.Runtime.csproj" />
+    <ProjectReference Include="..\..\gameplay\PVX.Gameplay\PVX.Gameplay.csproj" />
+
+    <ProjectReference Include="..\..\..\core\Stride.Core.Mathematics\Stride.Core.Mathematics.csproj" />
+    <ProjectReference Include="..\..\..\engine\Stride.Engine\Stride.Engine.csproj" />
+  </ItemGroup>
+
+  <Import Project="$(StrideRoot)sources/sdk/Stride.Build.Sdk/Sdk/Sdk.targets" />
+</Project>
