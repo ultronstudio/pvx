@@ -4,7 +4,6 @@ using Stride.Core;
 using Stride.Core.Mathematics;
 using Stride.Engine;
 using Stride.Engine.Design;
-using Stride.Physics;
 
 namespace PVX.World;
 
@@ -215,7 +214,7 @@ public sealed class PVXDoorComponent : ActivableEntityComponent, IPVXInteractabl
             // A collider may have already attached (and captured the
             // pre-StartsOpen pose) before this runs, depending on
             // processor ordering; force it back in sync immediately.
-            SyncPhysicsTransforms(Entity);
+            PVXPhysicsTransformSync.Sync(Entity);
         }
     }
 
@@ -256,7 +255,7 @@ public sealed class PVXDoorComponent : ActivableEntityComponent, IPVXInteractabl
             var from = State == PVXDoorState.Opening ? closedRotation : openRotation;
             var to = State == PVXDoorState.Opening ? openRotation : closedRotation;
             Entity.Transform.Rotation = Quaternion.Slerp(from, to, progress);
-            SyncPhysicsTransforms(Entity);
+            PVXPhysicsTransformSync.Sync(Entity);
         }
     }
 
@@ -264,7 +263,7 @@ public sealed class PVXDoorComponent : ActivableEntityComponent, IPVXInteractabl
     {
         var next = State == PVXDoorState.Opening ? PVXDoorState.Open : PVXDoorState.Closed;
         Entity.Transform.Rotation = next == PVXDoorState.Open ? openRotation : closedRotation;
-        SyncPhysicsTransforms(Entity);
+        PVXPhysicsTransformSync.Sync(Entity);
         SetState(next);
     }
 
@@ -276,35 +275,6 @@ public sealed class PVXDoorComponent : ActivableEntityComponent, IPVXInteractabl
         var previous = state;
         state = next;
         StateChanged?.Invoke(this, new PVXDoorStateChangedEventArgs(previous, next));
-    }
-
-    /// <summary>
-    /// Pushes this entity's (and its descendants') current transform into
-    /// Bullet's collision world. Required because a moved/rotated static
-    /// collider is not automatically re-synced by the physics engine after
-    /// attach — <see cref="PhysicsComponent.UpdatePhysicsTransformation"/>
-    /// is explicitly documented as the way to "manually force movements".
-    /// Descendants matter because a handle collider is typically a child
-    /// of the door leaf: its local transform never changes, but its WORLD
-    /// transform does whenever the leaf rotates.
-    /// </summary>
-    private static void SyncPhysicsTransforms(Entity entity)
-    {
-        foreach (var component in entity.Components)
-        {
-            if (component is PhysicsComponent physicsComponent)
-            {
-                physicsComponent.UpdatePhysicsTransformation();
-            }
-        }
-
-        foreach (var child in entity.Transform.Children)
-        {
-            if (child.Entity is { } childEntity)
-            {
-                SyncPhysicsTransforms(childEntity);
-            }
-        }
     }
 
     /// <summary>

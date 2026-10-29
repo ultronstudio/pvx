@@ -34,6 +34,19 @@
     <ProjectReference Include="..\..\runtime\PVX.Runtime\PVX.Runtime.csproj" />
     <ProjectReference Include="..\..\gameplay\PVX.Gameplay\PVX.Gameplay.csproj" />
 
+    <!--
+      PVXCarryComponent (Carry/) is the one thing in this assembly that
+      reaches outside movement/look: it needs PVX.Interaction's
+      PVXInteractionService (to learn when a PVXPickupComponent was just
+      picked up) and PVX.World's PVXPickupComponent itself (to check which
+      interactable it was). PVX.World/PVX.Interaction.Stride deliberately
+      stay decoupled from each other (see PVX.World.csproj's own remarks);
+      PVX.FirstPerson is the player-controller composition layer, so it is
+      the one allowed to depend on both.
+    -->
+    <ProjectReference Include="..\..\interaction\PVX.Interaction\PVX.Interaction.csproj" />
+    <ProjectReference Include="..\..\world\PVX.World\PVX.World.csproj" />
+
     <ProjectReference Include="..\..\..\core\Stride.Core.Mathematics\Stride.Core.Mathematics.csproj" />
     <ProjectReference Include="..\..\..\engine\Stride.Engine\Stride.Engine.csproj" />
     <ProjectReference Include="..\..\..\engine\Stride.Input\Stride.Input.csproj" />
