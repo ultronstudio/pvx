@@ -1,0 +1,44 @@
+<Project>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'Directory.Build.props'))/sdk/Stride.Build.Sdk/Sdk/Sdk.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'Directory.Build.props'))/pvx/PVX.Version.props" />
+
+  <PropertyGroup>
+    <Description>First-person grounded character foundation for PVX Engine: physics-backed movement, mouse look, and gameplay-capability-gated input.</Description>
+
+    <AssemblyName>PVX.FirstPerson</AssemblyName>
+    <RootNamespace>PVX.FirstPerson</RootNamespace>
+
+    <TargetFrameworks>$(StrideRuntimeTargetFrameworks)</TargetFrameworks>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+
+    <AssemblyTitle>PVX.FirstPerson</AssemblyTitle>
+    <Product>PVX Engine</Product>
+    <Company>ultron01</Company>
+
+    <!-- PVXFirstPersonControllerComponent is an entity component asset type: a
+         consuming game's asset compiler must load this assembly to deserialize
+         it out of a .sdscene. -->
+    <StrideContainsAssetTypes>true</StrideContainsAssetTypes>
+
+    <!-- Generates the binary content (DataSerializer) registration this
+         component needs to be loaded at runtime out of a compiled scene. -->
+    <StrideAssemblyProcessor>true</StrideAssemblyProcessor>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\runtime\PVX.Runtime\PVX.Runtime.csproj" />
+    <ProjectReference Include="..\..\gameplay\PVX.Gameplay\PVX.Gameplay.csproj" />
+
+    <ProjectReference Include="..\..\..\core\Stride.Core.Mathematics\Stride.Core.Mathematics.csproj" />
+    <ProjectReference Include="..\..\..\engine\Stride.Engine\Stride.Engine.csproj" />
+    <ProjectReference Include="..\..\..\engine\Stride.Input\Stride.Input.csproj" />
+    <ProjectReference Include="..\..\..\plugins\BulletPhysics\Stride.Physics\Stride.Physics.csproj" />
+  </ItemGroup>
+
+  <Import Project="$(StrideRoot)sources/sdk/Stride.Build.Sdk/Sdk/Sdk.targets" />
+</Project>
