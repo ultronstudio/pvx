@@ -20,10 +20,18 @@ namespace PVX.Interaction.Stride;
 /// input-agnostic, reacting only to interaction actions, never to key
 /// state directly. See <see cref="PVXStrideInteractionControllerProcessor"/>
 /// for the actual wiring/lifecycle and its ownership policy.
+/// <para>
+/// <see cref="DefaultEntityComponentProcessorAttribute.ExecutionMode"/> is
+/// pinned to <see cref="ExecutionMode.Runtime"/>: the processor requires a
+/// live <c>PVXRuntime</c>/<c>PVXInteractionFeature</c> and throws clearly
+/// if neither is registered — correct in an actual game, but would also
+/// fire merely from displaying this component in GameStudio's scene
+/// editor (<c>ExecutionMode.Editor</c>, no PVX runtime at all).
+/// </para>
 /// </remarks>
 [DataContract("PVXStrideInteractionControllerComponent")]
 [Display("PVX Interaction Controller")]
-[DefaultEntityComponentProcessor(typeof(PVXStrideInteractionControllerProcessor))]
+[DefaultEntityComponentProcessor(typeof(PVXStrideInteractionControllerProcessor), ExecutionMode = ExecutionMode.Runtime)]
 public sealed class PVXStrideInteractionControllerComponent : ActivableEntityComponent
 {
     /// <summary>

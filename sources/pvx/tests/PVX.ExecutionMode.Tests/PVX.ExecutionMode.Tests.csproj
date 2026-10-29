@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!--
+    Deliberately a plain reflection-only test project spanning every PVX
+    module that has a DefaultEntityComponentProcessor: this is testing one
+    cross-cutting invariant (which processors must be Runtime-only so they
+    never run in GameStudio's scene editor), not module-specific behavior,
+    so it does not belong in any single module's own test project. No live
+    Entity/Simulation/InputManager is needed — only Type.GetCustomAttributes.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\world\PVX.World\PVX.World.csproj" />
+    <ProjectReference Include="..\..\firstperson\PVX.FirstPerson\PVX.FirstPerson.csproj" />
+    <ProjectReference Include="..\..\interaction\PVX.Interaction.Stride\PVX.Interaction.Stride.csproj" />
+    <ProjectReference Include="..\..\cinematics\PVX.Cinematics\PVX.Cinematics.csproj" />
+    <ProjectReference Include="..\..\dialogue\PVX.Dialogue\PVX.Dialogue.csproj" />
+  </ItemGroup>
+</Project>

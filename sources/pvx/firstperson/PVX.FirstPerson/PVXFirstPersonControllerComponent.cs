@@ -33,10 +33,20 @@ namespace PVX.FirstPerson;
 /// capture, gameplay-capability gating, and driving <see cref="Character"/>/
 /// the entity transforms from the values computed here.
 /// </para>
+/// <para>
+/// <see cref="DefaultEntityComponentProcessorAttribute.ExecutionMode"/> is
+/// pinned to <see cref="ExecutionMode.Runtime"/>: the processor requires a
+/// live <c>PVXRuntime</c>/<c>PVXGameplaySession</c> and throws clearly if
+/// neither is registered, which is correct in an actual game but would
+/// otherwise also fire when an entity carrying this component is merely
+/// being displayed in GameStudio's scene editor (<c>ExecutionMode.Editor</c>,
+/// no PVX runtime at all) — the component must stay authorable there even
+/// though its processor must not run.
+/// </para>
 /// </remarks>
 [DataContract("PVXFirstPersonControllerComponent")]
 [Display("PVX First-Person Controller")]
-[DefaultEntityComponentProcessor(typeof(PVXFirstPersonControllerProcessor))]
+[DefaultEntityComponentProcessor(typeof(PVXFirstPersonControllerProcessor), ExecutionMode = ExecutionMode.Runtime)]
 public sealed class PVXFirstPersonControllerComponent : ActivableEntityComponent
 {
     /// <summary>

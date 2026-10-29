@@ -39,10 +39,18 @@ namespace PVX.FirstPerson;
 /// and carrying more than one item at a time (<see cref="TryBeginCarry"/>
 /// fails outright while already carrying something).
 /// </para>
+/// <para>
+/// <see cref="DefaultEntityComponentProcessorAttribute.ExecutionMode"/> is
+/// pinned to <see cref="ExecutionMode.Runtime"/>: the processor requires a
+/// live <c>PVXRuntime</c>/<c>PVXInteractionFeature</c> and throws clearly
+/// if neither is registered — correct in an actual game, but would also
+/// fire merely from displaying this component in GameStudio's scene
+/// editor (<c>ExecutionMode.Editor</c>, no PVX runtime at all).
+/// </para>
 /// </remarks>
 [DataContract("PVXCarryComponent")]
 [Display("PVX Carry")]
-[DefaultEntityComponentProcessor(typeof(PVXCarryProcessor))]
+[DefaultEntityComponentProcessor(typeof(PVXCarryProcessor), ExecutionMode = ExecutionMode.Runtime)]
 public sealed class PVXCarryComponent : ActivableEntityComponent
 {
     /// <summary>

@@ -23,10 +23,20 @@ namespace PVX.World;
 /// is relative to however the drawer was authored (an angled drawer front
 /// still slides "outward" rather than along a world axis). Capture happens
 /// once, on first attach (<see cref="PVXDrawerProcessor.OnEntityComponentAdding"/>).
+/// <para>
+/// <see cref="DefaultEntityComponentProcessorAttribute.ExecutionMode"/> is
+/// pinned to <see cref="ExecutionMode.Runtime"/>: pose capture and
+/// transition playback are gameplay simulation, not something GameStudio's
+/// scene editor (<c>ExecutionMode.Editor</c>) should ever drive just from
+/// displaying the entity — same reasoning as <see cref="PVXDoorComponent"/>'s
+/// own remarks. Every authored property stays a plain <c>DataMember</c>,
+/// independent of the processor, so the component remains fully
+/// inspectable/editable there regardless.
+/// </para>
 /// </remarks>
 [DataContract("PVXDrawerComponent")]
 [Display("PVX Drawer")]
-[DefaultEntityComponentProcessor(typeof(PVXDrawerProcessor))]
+[DefaultEntityComponentProcessor(typeof(PVXDrawerProcessor), ExecutionMode = ExecutionMode.Runtime)]
 public sealed class PVXDrawerComponent : ActivableEntityComponent, IPVXInteractable
 {
     public static readonly PVXInteractionActionId OpenActionId = new("open");

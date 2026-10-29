@@ -32,10 +32,20 @@ namespace PVX.World;
 /// <c>PVXControlCapabilities.Interact</c>; duplicating that check here
 /// would be a second, possibly inconsistent gate.
 /// </para>
+/// <para>
+/// <see cref="DefaultEntityComponentProcessorAttribute.ExecutionMode"/> is
+/// pinned to <see cref="ExecutionMode.Runtime"/>: pose capture and
+/// transition playback are gameplay simulation, not something GameStudio's
+/// scene editor (<c>ExecutionMode.Editor</c>) should ever drive just from
+/// displaying the entity. Every authored property (<see cref="OpenAngleDegrees"/>,
+/// <see cref="TransitionDuration"/>, <see cref="StartsOpen"/>, <see cref="LocalHingeAxis"/>)
+/// stays a plain <c>DataMember</c>, independent of the processor, so the
+/// component remains fully inspectable/editable there regardless.
+/// </para>
 /// </remarks>
 [DataContract("PVXDoorComponent")]
 [Display("PVX Door")]
-[DefaultEntityComponentProcessor(typeof(PVXDoorProcessor))]
+[DefaultEntityComponentProcessor(typeof(PVXDoorProcessor), ExecutionMode = ExecutionMode.Runtime)]
 public sealed class PVXDoorComponent : ActivableEntityComponent, IPVXInteractable
 {
     /// <summary>

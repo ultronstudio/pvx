@@ -31,10 +31,18 @@ namespace PVX.Cinematics;
 /// animation, look-at targets) — this only moves a transform through a
 /// sequence of poses.
 /// </para>
+/// <para>
+/// <see cref="DefaultEntityComponentProcessorAttribute.ExecutionMode"/> is
+/// pinned to <see cref="ExecutionMode.Runtime"/>: the processor requires a
+/// live <c>PVXRuntime</c>/<c>PVXGameplaySession</c> and throws clearly if
+/// neither is registered — correct in an actual game, but would also fire
+/// merely from displaying this component in GameStudio's scene editor
+/// (<c>ExecutionMode.Editor</c>, no PVX runtime at all).
+/// </para>
 /// </remarks>
 [DataContract("PVXCinematicComponent")]
 [Display("PVX Cinematic")]
-[DefaultEntityComponentProcessor(typeof(PVXCinematicProcessor))]
+[DefaultEntityComponentProcessor(typeof(PVXCinematicProcessor), ExecutionMode = ExecutionMode.Runtime)]
 public sealed class PVXCinematicComponent : ActivableEntityComponent
 {
     /// <summary>
