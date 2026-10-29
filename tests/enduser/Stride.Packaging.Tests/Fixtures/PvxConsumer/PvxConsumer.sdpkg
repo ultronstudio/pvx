@@ -1,0 +1,7 @@
+!Package
+Id: 38172e61-e2f3-4a69-b2e7-4da19073c72d
+SerializedVersion: {Assets: 3.1.0.0}
+AssetFolders:
+    -   Path: !dir Assets
+RootAssets:
+    - 563e417f-2345-4c5a-88fe-80a31eb784c3:TestScene

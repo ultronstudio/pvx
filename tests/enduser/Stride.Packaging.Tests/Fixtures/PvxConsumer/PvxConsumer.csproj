@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>PvxConsumer</RootNamespace>
+    <Nullable>enable</Nullable>
+    <!-- This project (not PVX.World) is the asset compiler's host assembly — the one marked
+         StrideIsExecutable — so it needs this true regardless of the fact that it defines no
+         asset types of its own: it is what makes the compiler scan a host assembly at all, and
+         from there the referenced PVX.World.dll loads transitively like any .NET reference. -->
+    <StrideContainsAssetTypes>true</StrideContainsAssetTypes>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Versions are passed as MSBuild global properties by the test (-p:PvxVersion=...
+         -p:StrideEngineVersion=...), resolved from whatever is actually in bin/packages —
+         see TestEnvironment.ResolvePvxVersion/ResolveStrideVersion. -->
+    <PackageReference Include="PVX.World" Version="$(PvxVersion)" />
+    <PackageReference Include="Stride.AssetCompiler" Version="$(StrideEngineVersion)" IncludeAssets="build;buildTransitive" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PvxConsumer.sdpkg" />
+  </ItemGroup>
+</Project>

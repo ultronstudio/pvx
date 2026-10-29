@@ -52,14 +52,23 @@ internal static class TestEnvironment
     /// The locally-built Stride NuGet version to pin fixtures to. Prefers a prerelease (the dev
     /// auto-deploy stamp, e.g. 4.4.0.2-dev1); CI's clean feed has exactly one.
     /// </summary>
-    public static string ResolveStrideVersion()
+    public static string ResolveStrideVersion() => ResolvePackageVersion("Stride.Engine");
+
+    /// <summary>
+    /// The locally-built PVX NuGet version to pin fixtures to — PVX.* packages auto-pack on the
+    /// same every-build cadence as Stride.* (see PVX.Version.props) but on their own, separate
+    /// version line, so this cannot just reuse <see cref="ResolveStrideVersion"/>.
+    /// </summary>
+    public static string ResolvePvxVersion() => ResolvePackageVersion("PVX.Core");
+
+    private static string ResolvePackageVersion(string packageId)
     {
-        const string prefix = "Stride.Engine.";
-        var versions = Directory.EnumerateFiles(BinPackages(), "Stride.Engine.*.nupkg")
+        var prefix = packageId + ".";
+        var versions = Directory.EnumerateFiles(BinPackages(), packageId + ".*.nupkg")
             .Select(f => Path.GetFileNameWithoutExtension(f)[prefix.Length..])
             .ToList();
         if (versions.Count == 0)
-            throw new InvalidOperationException($"No Stride.Engine package found in {BinPackages()}.");
+            throw new InvalidOperationException($"No {packageId} package found in {BinPackages()}.");
         var prerelease = versions.Where(v => v.Contains('-')).ToList();
         return (prerelease.Count > 0 ? prerelease : versions).OrderByDescending(v => v, StringComparer.Ordinal).First();
     }

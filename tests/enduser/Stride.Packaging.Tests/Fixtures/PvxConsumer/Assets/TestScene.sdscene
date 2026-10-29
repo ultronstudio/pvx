@@ -1,0 +1,25 @@
+!SceneAsset
+Id: 563e417f-2345-4c5a-88fe-80a31eb784c3
+SerializedVersion: {Stride: 2.1.0.1}
+Tags: []
+ChildrenIds: []
+Offset: {X: 0.0, Y: 0.0, Z: 0.0}
+Hierarchy:
+    RootParts:
+        - ref!! 0ccc7aa8-9bd8-40ac-b53e-f92e4043bc5e
+    Parts:
+        -   Entity:
+                Id: 0ccc7aa8-9bd8-40ac-b53e-f92e4043bc5e
+                Name: Door
+                Components:
+                    78f33fd0a9ce41c9a7003bd02b02c690: !TransformComponent
+                        Id: 78f33fd0-a9ce-41c9-a700-3bd02b02c690
+                        Position: {X: 0.0, Y: 0.0, Z: 0.0}
+                        Rotation: {X: 0.0, Y: 0.0, Z: 0.0, W: 1.0}
+                        Scale: {X: 1.0, Y: 1.0, Z: 1.0}
+                        Children: {}
+                    6367974ac0294a9da8d89d4baab1ccdd: !PVXDoorComponent
+                        Id: 6367974a-c029-4a9d-a8d8-9d4baab1ccdd
+                        OpenAngleDegrees: 77.0
+                        TransitionDuration: 0.5
+                        StartsOpen: false

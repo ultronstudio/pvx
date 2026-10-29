@@ -61,6 +61,9 @@ internal static class NuGetConsumerFeed
                 <packageSource key="stride-local">
                   <package pattern="Stride" />
                   <package pattern="Stride.*" />
+                  <!-- PVX.* packages auto-pack into the same bin/packages feed (PVX.Version.props) -->
+                  <package pattern="PVX" />
+                  <package pattern="PVX.*" />
                 </packageSource>
             {mappings.ToString().TrimEnd()}
               </packageSourceMapping>
