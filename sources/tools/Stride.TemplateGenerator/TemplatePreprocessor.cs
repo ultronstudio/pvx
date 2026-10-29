@@ -93,6 +93,14 @@ internal class TemplatePreprocessor
     public string? EngineVersion { get; set; }
 
     /// <summary>
+    /// Same purpose as <see cref="EngineVersion"/>, for PVX templates (pvx-game, pvx-psychological-horror):
+    /// stamps every literal <c>$PvxVersion$</c> and every <c>PVX.*</c> <c>PackageReference</c>
+    /// version with this value. Independent of <see cref="EngineVersion"/> since PVX has its own
+    /// version line (<c>PVX.Version.props</c>), separate from Stride's inherited version.
+    /// </summary>
+    public string? PvxVersion { get; set; }
+
+    /// <summary>
     /// Parsed from the input's <c>.sdtpl</c> file (if present). Drives template.json metadata
     /// (Name, Description, identity, etc.) and per-template parameter opt-in via the
     /// <see cref="SdtplMetadata.Parameters"/> list. Null when the input dir has no .sdtpl —
@@ -262,6 +270,11 @@ internal class TemplatePreprocessor
         // engine it shipped with. See the EngineVersion property doc.
         if (!string.IsNullOrEmpty(EngineVersion))
             SubstituteEngineVersion(logger);
+
+        // Same idea as the engine-version stamp above, for PVX.* references (pvx-game,
+        // pvx-psychological-horror). Independent of EngineVersion: PVX has its own version line.
+        if (!string.IsNullOrEmpty(PvxVersion))
+            SubstitutePvxVersion(logger);
 
         // Normalize line endings so the nupkg is byte-identical regardless of build host
         // (Windows checkout = CRLF, Linux CI = LF) and regardless of which step wrote each
@@ -436,32 +449,46 @@ internal class TemplatePreprocessor
     private static bool IsNonEnginePackage(string packageId)
         => NonEnginePackagePrefixes.Any(prefix => packageId.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
 
-    private void SubstituteEngineVersion(ILogger logger)
+    private void SubstituteEngineVersion(ILogger logger) =>
+        SubstituteVersionPlaceholder("$EngineVersion$", EngineVersion!, "Stride", IsNonEnginePackage, "Stride.*", logger);
+
+    /// <summary>See <see cref="PvxVersion"/>. No non-engine exclusion list: unlike Stride.*,
+    /// there is no third-party "PVX.*"-prefixed package landscape to carve out yet.</summary>
+    private void SubstitutePvxVersion(ILogger logger) =>
+        SubstituteVersionPlaceholder("$PvxVersion$", PvxVersion!, "PVX", static _ => false, "PVX.*", logger);
+
+    /// <summary>
+    /// Shared implementation for <see cref="SubstituteEngineVersion"/>/<see cref="SubstitutePvxVersion"/>:
+    /// replaces every literal <paramref name="placeholder"/> and stamps every <c>PackageReference</c>
+    /// whose Include starts with <paramref name="packagePrefix"/> (and isn't excluded by
+    /// <paramref name="isExcluded"/>) to <paramref name="version"/>, across every staged .csproj.
+    /// </summary>
+    private void SubstituteVersionPlaceholder(string placeholder, string version, string packagePrefix, Func<string, bool> isExcluded, string logLabel, ILogger logger)
     {
         var files = 0;
         var references = 0;
         foreach (var csproj in Directory.EnumerateFiles(OutputDirectory!, "*.csproj", SearchOption.AllDirectories))
         {
             var content = File.ReadAllText(csproj);
-            var updated = content.Replace("$EngineVersion$", EngineVersion);
+            var updated = content.Replace(placeholder, version);
             var doc = XDocument.Parse(updated, LoadOptions.PreserveWhitespace);
             var stamped = 0;
             foreach (var reference in doc.Descendants().Where(e => e.Name.LocalName == "PackageReference"))
             {
                 var include = (string?)reference.Attribute("Include");
                 // Version is an attribute or a child element
-                var version = (XObject?)reference.Attribute("Version") ?? reference.Elements().FirstOrDefault(e => e.Name.LocalName == "Version");
-                if (include is null || version is null || !include.StartsWith("Stride", StringComparison.Ordinal))
+                var versionNode = (XObject?)reference.Attribute("Version") ?? reference.Elements().FirstOrDefault(e => e.Name.LocalName == "Version");
+                if (include is null || versionNode is null || !include.StartsWith(packagePrefix, StringComparison.Ordinal))
                     continue;
-                var value = version is XAttribute attribute ? attribute.Value : ((XElement)version).Value;
+                var value = versionNode is XAttribute attribute ? attribute.Value : ((XElement)versionNode).Value;
                 // A remaining $placeholder$ is someone else's substitution point; community
                 // packages keep their committed version.
-                if (value.Contains('$') || value == EngineVersion || IsNonEnginePackage(include))
+                if (value.Contains('$') || value == version || isExcluded(include))
                     continue;
-                if (version is XAttribute versionAttribute)
-                    versionAttribute.Value = EngineVersion;
+                if (versionNode is XAttribute versionAttribute)
+                    versionAttribute.Value = version;
                 else
-                    ((XElement)version).Value = EngineVersion;
+                    ((XElement)versionNode).Value = version;
                 stamped++;
             }
 
@@ -485,7 +512,7 @@ internal class TemplatePreprocessor
             }
         }
         if (files > 0)
-            logger.Info($"Stamped engine version {EngineVersion} into {files} .csproj file(s) ({references} Stride.* reference(s) rewritten)");
+            logger.Info($"Stamped version {version} into {files} .csproj file(s) ({references} {logLabel} reference(s) rewritten)");
     }
 
     /// <summary>

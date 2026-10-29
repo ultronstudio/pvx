@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- ProjectReference triggers Build on PVX.Templates.Games, which auto-packs it via
+       Stride.Templates.Common.targets' GeneratePackageOnBuild=true (same mechanism
+       Stride.Templates.Tests.csproj uses for the Stride.Templates.* packages). Result:
+       bin/packages has PVX.Templates.Games.<version>.nupkg by the time the smoke test runs.
+       ReferenceOutputAssembly=false keeps this a build-order constraint only. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\templates\PVX.Templates.Games\PVX.Templates.Games.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+      <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

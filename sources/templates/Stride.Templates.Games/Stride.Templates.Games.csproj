@@ -3,7 +3,19 @@
      suppress it. Removing it from the project's global-property context also keeps MSBuild from
      deduplicating into two distinct project instances when the property differs across the paths
      that reach this project. -->
-<Project Sdk="Microsoft.Build.NoTargets" TreatAsLocalProperty="StrideSkipAutoPack">
+<!-- TargetFramework is set, then Sdk.props imported explicitly (rather than via the Project
+     Sdk= attribute, which would import it first): on the SDKs this checkout builds with, a
+     NoTargets project's Sdk.props runs its own TargetFrameworkInference before any later
+     PropertyGroup/Import gets a chance to set TargetFramework, baking in TargetFrameworkIdentifier=
+     "_"/Version=v0.0 and failing later with NETSDK1013 — even though nothing here ever compiles
+     anything. Setting TargetFramework first, then importing Sdk.props explicitly, avoids the early
+     inference entirely. Same fix applied to every other Stride.Templates.*.csproj and to
+     PVX.Templates.Games.csproj. -->
+<Project TreatAsLocalProperty="StrideSkipAutoPack">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.Build.NoTargets" />
   <PropertyGroup>
     <PackageId>Stride.Templates.Games</PackageId>
     <Title>Stride Game Templates</Title>
@@ -39,4 +51,5 @@
     <UpToDateCheckInput Include="$(StrideRoot)samples/Library/Library/**/*" />
     <UpToDateCheckInput Include="$(StrideRoot)samples/Plugin/Plugin/**/*" />
   </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.Build.NoTargets" />
 </Project>

@@ -1,0 +1,8 @@
+!TemplateSample
+Id: 7c5438c7-d657-4a6e-a5bf-46f611e556f1
+Name: "PVX: Blank Game"
+Scope: Session
+Description: A clean, minimal PVX game — the PVX runtime booted, nothing else.
+FullDescription: Boots the real PVX runtime (PVXGame, PVXGameplayFeature) with a basic scene, camera and renderer. No gameplay systems are pre-wired beyond the runtime itself — add PVXInteractionFeature, PVX.World, PVX.FirstPerson, etc. as your game needs them.
+Group: PVX
+DefaultOutputName: PvxGame

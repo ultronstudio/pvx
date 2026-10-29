@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>MyTemplate</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="PVX.Runtime" Version="$PvxVersion$" />
+    <PackageReference Include="PVX.Gameplay" Version="$PvxVersion$" />
+    <PackageReference Include="Stride.Engine" Version="$EngineVersion$" />
+    <PackageReference Include="Stride.AssetCompiler" Version="$EngineVersion$" IncludeAssets="build;buildTransitive" />
+  </ItemGroup>
+</Project>

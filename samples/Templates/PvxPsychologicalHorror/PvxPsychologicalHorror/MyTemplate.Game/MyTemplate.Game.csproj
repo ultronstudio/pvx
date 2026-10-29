@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>MyTemplate</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="PVX.Runtime" Version="$PvxVersion$" />
+    <PackageReference Include="PVX.Gameplay" Version="$PvxVersion$" />
+    <PackageReference Include="PVX.Interaction" Version="$PvxVersion$" />
+    <PackageReference Include="PVX.Interaction.Stride" Version="$PvxVersion$" />
+    <PackageReference Include="PVX.World" Version="$PvxVersion$" />
+    <PackageReference Include="PVX.FirstPerson" Version="$PvxVersion$" />
+    <PackageReference Include="Stride.Engine" Version="$EngineVersion$" />
+    <PackageReference Include="Stride.Physics" Version="$EngineVersion$" />
+    <PackageReference Include="Stride.Input" Version="$EngineVersion$" />
+    <PackageReference Include="Stride.AssetCompiler" Version="$EngineVersion$" IncludeAssets="build;buildTransitive" />
+  </ItemGroup>
+</Project>

@@ -85,6 +85,7 @@
     <Project Path="sources/pvx/interaction/PVX.Interaction.Stride/PVX.Interaction.Stride.csproj" />
     <Project Path="sources/pvx/world/PVX.World/PVX.World.csproj" />
     <Project Path="sources/pvx/firstperson/PVX.FirstPerson/PVX.FirstPerson.csproj" />
+    <Project Path="sources/pvx/templates/PVX.Templates.Games/PVX.Templates.Games.csproj" />
   </Folder>
   <Folder Name="/19-PVX.Tests/">
     <Project Path="sources/pvx/tests/PVX.Sandbox/PVX.Sandbox.csproj" />
@@ -93,6 +94,7 @@
     <Project Path="sources/pvx/tests/PVX.Interaction.Stride.Tests/PVX.Interaction.Stride.Tests.csproj" />
     <Project Path="sources/pvx/tests/PVX.World.Tests/PVX.World.Tests.csproj" />
     <Project Path="sources/pvx/tests/PVX.FirstPerson.Tests/PVX.FirstPerson.Tests.csproj" />
+    <Project Path="sources/pvx/tests/PVX.Templates.Tests/PVX.Templates.Tests.csproj" />
     <Project Path="sources/pvx/playground/PVX.World.Playground/PVX.World.Playground.csproj" />
   </Folder>
   <Folder Name="/20-StrideRuntime/">

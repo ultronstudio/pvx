@@ -1,5 +1,11 @@
 <!-- TreatAsLocalProperty="StrideSkipAutoPack": see Stride.Templates.Games.csproj. -->
-<Project Sdk="Microsoft.Build.NoTargets" TreatAsLocalProperty="StrideSkipAutoPack">
+<!-- TargetFramework is set, then Sdk.props imported explicitly (not via the Project Sdk=
+     attribute): see Stride.Templates.Games.csproj's own comment for why the ordering matters. -->
+<Project TreatAsLocalProperty="StrideSkipAutoPack">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.Build.NoTargets" />
   <PropertyGroup>
     <PackageId>Stride.Templates.Samples</PackageId>
     <StrideTemplateContentVersioned>true</StrideTemplateContentVersioned>
@@ -96,4 +102,5 @@
     <UpToDateCheckInput Include="$(StrideRoot)samples/UI/UIElementLink/**/*" />
     <UpToDateCheckInput Include="$(StrideRoot)samples/UI/UIParticles/**/*" />
   </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.Build.NoTargets" />
 </Project>

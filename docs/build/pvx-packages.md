@@ -41,3 +41,50 @@ builds a minimal external consumer (`Fixtures/PvxConsumer`) against an isolated 
 cache and asserts it restores, builds, compiles a `.sdscene` containing a `PVXDoorComponent`,
 and that the compiled content loads at runtime with the authored property value intact —
 with no `ProjectReference` anywhere in the fixture.
+
+## Project templates (`dotnet new`)
+
+[`PVX.Templates.Games`](../../sources/pvx/templates/PVX.Templates.Games/PVX.Templates.Games.csproj)
+packs two `dotnet new` starters on top of Stride's own `StrideSampleTemplate`/preprocessor
+pipeline (same mechanism as `Stride.Templates.Games`, just pointed at PVX samples instead
+of Stride's):
+
+- **`pvx-game`** (`samples/Templates/PvxGame/PvxGame`) — a blank PVX game: the real
+  `PVXGame`/`PVXGameplayFeature` runtime, a minimal scene, nothing else.
+- **`pvx-psychological-horror`** (`samples/Templates/PvxPsychologicalHorror/PvxPsychologicalHorror`) —
+  the same runtime plus `PVXInteractionFeature`, a first-person controller
+  (`PVX.FirstPerson`), and a small example room (a door with an interaction point on its
+  handle, a switch) built from `PVX.World`/`PVX.Interaction.Stride`. A starting point, not
+  a complete horror game.
+
+Both packages' `PackageReference`s use `$PvxVersion$`/`$EngineVersion$` placeholders,
+substituted at pack time the same way Stride's own `--engine-version` flag works (see
+`TemplatePreprocessor.PvxVersion`/`SubstitutePvxVersion`, wired in via
+`$(StrideTemplatesExtraPreprocessArgs)` — the one opt-in hook `Stride.Templates.Common.targets`
+exposes for this, with zero behavior change for Stride's own template packages). Build and
+install locally with:
+
+```
+dotnet build sources/pvx/templates/PVX.Templates.Games/PVX.Templates.Games.csproj
+dotnet new install bin/packages/PVX.Templates.Games.<version>.nupkg
+dotnet new pvx-psychological-horror -n MyGame
+```
+
+The instantiated project restores against `bin/packages` the same way as the manual
+workflow above (point `nuget.config` at it with the same package source mapping).
+
+### NoTargets SDK fix (affects all `Stride.Templates.*` too)
+
+While wiring this up, every `Stride.Templates.*.csproj` (`Games`, `Games.Starters`,
+`Samples`, `AssetPacks`) turned out to already be broken on newer .NET SDKs (confirmed on
+10.0.403; the repo's `global.json` pins `10.0.100`): `dotnet build <project>.csproj` failed
+with `NETSDK1013` ("TargetFramework value '' was not recognized"), and anything
+`ProjectReference`-ing one of them (e.g. `Stride.Packaging.Tests`) failed restore with
+`NU1201`. Root cause: `<Project Sdk="Microsoft.Build.NoTargets">` imports `Sdk.props`
+*before* any of the project body runs, so `TargetFrameworkInference` ran against an empty
+`TargetFramework` and baked in `TargetFrameworkIdentifier=_`/`Version=v0.0` — setting
+`TargetFramework` later (inside `Stride.Templates.Common.targets`, as all five of these
+projects do) was too late to matter. Fixed by setting `TargetFramework` first, then
+importing `Sdk.props`/`Sdk.targets` explicitly instead of via the `Project Sdk=` attribute
+(same ordering trick `PVX.Core.csproj` already uses for `Stride.Build.Sdk`) — applied to
+all five NoTargets template projects identically. Zero behavior change otherwise.

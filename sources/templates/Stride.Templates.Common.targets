@@ -251,8 +251,11 @@
          against the engine it shipped with — including via plain `dotnet new`, which has no
          Stride-side rewrite hook. platform-template-path points the preprocessor at the NewGame
          scaffold so samples that ship only Windows (most of them) gain Linux/macOS/iOS/Android
-         exec projects in the packed output. -->
-    <Exec Command="dotnet &quot;$(StrideTemplatesDll)&quot; preprocess-template --input-path=&quot;%(StrideSampleTemplate.SamplePath)&quot; --output-path=&quot;$(TemplateContentRoot)/%(StrideSampleTemplate.Identity)&quot; --template-name=%(StrideSampleTemplate.Identity) --engine-version=&quot;$(_StrideTemplatesEngineVersion)&quot; --platform-template-path=&quot;$(StrideRoot)samples/NewGame/NewGame&quot; $(_StrideTemplatesSkipPruneFlag)" />
+         exec projects in the packed output. $(StrideTemplatesExtraPreprocessArgs) is an opt-in
+         extension point: empty here (no behavior change for Stride's own template packages);
+         PVX.Templates.Games sets it to add a pvx-version option for PVX.* references, which this
+         tool knows nothing else about. -->
+    <Exec Command="dotnet &quot;$(StrideTemplatesDll)&quot; preprocess-template --input-path=&quot;%(StrideSampleTemplate.SamplePath)&quot; --output-path=&quot;$(TemplateContentRoot)/%(StrideSampleTemplate.Identity)&quot; --template-name=%(StrideSampleTemplate.Identity) --engine-version=&quot;$(_StrideTemplatesEngineVersion)&quot; --platform-template-path=&quot;$(StrideRoot)samples/NewGame/NewGame&quot; $(_StrideTemplatesSkipPruneFlag) $(StrideTemplatesExtraPreprocessArgs)" />
 
     <!-- Aggregate every wrapped template's .sdtpl into a single multi-doc YAML at the package
          root. GameStudio's bridge reads this one file for display metadata. -->

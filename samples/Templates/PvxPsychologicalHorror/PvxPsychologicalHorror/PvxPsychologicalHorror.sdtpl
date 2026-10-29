@@ -1,0 +1,8 @@
+!TemplateSample
+Id: 8a7c571c-e637-4250-968a-204608ee1f21
+Name: "PVX: Psychological Horror Foundation"
+Scope: Session
+Description: "A first-person psychological horror starter — grounded movement, a lockable/openable door, a switch, and an interaction point, all wired through the real PVX runtime."
+FullDescription: "Boots the real PVX runtime (PVXGame, PVXGameplayFeature, PVXInteractionFeature) with a small example room: a first-person controller (PVX.FirstPerson), a door (PVX.World's PVXDoorComponent) with an interaction point on its handle, and a wall switch (PVXSwitchComponent). Everything is driven by PVX.Interaction.Stride's interaction controller, exactly like PVX's own dogfood project. Intended as a starting point for a horror game, not a complete one — add your own narrative, lighting, and audio systems on top."
+Group: PVX
+DefaultOutputName: PvxPsychologicalHorror
